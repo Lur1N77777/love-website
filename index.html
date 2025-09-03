@@ -9,104 +9,110 @@
     <script src="https://cdn.jsdelivr.net/npm/leancloud-storage@4.13/dist/av-live-query-min.js"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700&family=Lxgw+WenKai+Lite:wght@400;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Gaegu:wght@400;700&family=ZCOOL+KuaiLe&display=swap" rel="stylesheet">
     <style>
         body {
-            font-family: 'Nunito', sans-serif;
-            background-color: #FFF0F5; 
-            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='40' height='40' viewBox='0 0 40 40'%3E%3Cg fill-rule='evenodd'%3E%3Cg fill='%23FBCFE8' fill-opacity='0.4'%3E%3Cpath d='M0 38.59l2.83-2.83 1.41 1.41L1.41 40H0v-1.41zM0 1.4l2.83 2.83 1.41-1.41L1.41 0H0v1.41zM38.59 40l-2.83-2.83 1.41-1.41L40 38.59V40h-1.41zM40 1.41l-2.83 2.83-1.41-1.41L38.59 0H40v1.41zM20 18.6l2.83-2.83 1.41 1.41L21.41 20l2.83 2.83-1.41 1.41L20 21.41l-2.83 2.83-1.41-1.41L18.59 20l-2.83-2.83 1.41-1.41L20 18.59z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+            font-family: 'Gaegu', cursive;
+            background: linear-gradient(170deg, #ffdde1 0%, #ffc4c8 100%);
             -webkit-tap-highlight-color: transparent;
         }
-        .font-chinese { font-family: 'LXGW WenKai Lite', cursive; }
-        .bg-macaron-pink { background-color: #F8C8DC; }
-        .bg-macaron-blue { background-color: #A2D2FF; }
-        .bg-macaron-yellow { background-color: #FCF3CF; }
-        .bg-macaron-green { background-color: #BDE0FE; }
-        .text-macaron-brown { color: #8d6e63; }
-        .border-macaron-pink { border-color: #F8C8DC; }
-        .border-macaron-blue { border-color: #A2D2FF; }
-        .border-macaron-green { border-color: #BDE0FE; }
+        .font-chinese { font-family: 'ZCOOL KuaiLe', cursive; }
+        .bg-sweet-pink { background-color: #ffafcc; }
+        .bg-sweet-blue { background-color: #a2d2ff; }
+        .bg-sweet-yellow { background-color: #fff1a8; }
+        .bg-sweet-green { background-color: #cdffcd; }
+        .text-sweet-brown { color: #7c5c53; }
+        .border-sweet-pink { border-color: #ffafcc; }
+        .border-sweet-blue { border-color: #a2d2ff; }
         .bg-warm-white { background-color: #FFFCF9; }
-        .bg-soft-pink-glass { background-color: rgba(255, 240, 245, 0.8); }
+        .bg-glass-effect {
+            background-color: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 8px 32px 0 rgba(236, 72, 153, 0.15);
+        }
         .fade-in { animation: fadeIn 1s ease-in-out; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(-20px); } to { opacity: 1; transform: translateY(0); } }
         .modal-bg { background-color: rgba(0, 0, 0, 0.5); }
         .diary-image { max-height: 300px; object-fit: cover; }
         .btn-disabled { cursor: not-allowed; background-color: #d1d5db; }
+
+        /* 新增的用户选择器样式 */
+        .user-select-btn {
+            background-color: #ffffff;
+            color: #a38f85;
+            font-size: 1.1rem;
+            font-weight: bold;
+            border: 2px solid transparent;
+        }
+        .user-select-btn.selected {
+            border-color: #ffafcc;
+            color: #7c5c53;
+            transform: scale(1.05);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        }
     </style>
 </head>
-<body class="flex items-center justify-center min-h-screen">
-
-    <!-- 登录遮罩层 -->
-    <div id="login-modal" class="fixed inset-0 z-50 flex items-center justify-center modal-bg transition-opacity duration-300">
-        <div class="bg-white p-8 rounded-2xl shadow-2xl text-center w-11/12 max-w-sm">
-            <h2 class="text-3xl font-bold text-macaron-brown font-chinese mb-4">进入我们的爱巢</h2>
-            <p class="text-gray-500 mb-6">请选择你的身份~</p>
-            <div class="space-y-4">
-                <button onclick="showPasswordPrompt('her')" class="w-full bg-macaron-pink text-white py-3 rounded-xl font-bold text-lg hover:bg-opacity-80 transition-all duration-300 transform hover:scale-105">我是女生</button>
-                <button onclick="showPasswordPrompt('him')" class="w-full bg-macaron-blue text-white py-3 rounded-xl font-bold text-lg hover:bg-opacity-80 transition-all duration-300 transform hover:scale-105">我是男生</button>
-            </div>
-        </div>
-    </div>
-    
-    <!-- 密码输入弹窗 -->
-    <div id="password-prompt" class="fixed inset-0 z-50 hidden items-center justify-center modal-bg transition-opacity duration-300">
-        <div class="bg-white p-8 rounded-2xl shadow-2xl text-center w-11/11 max-w-sm">
-            <h2 id="password-title" class="text-2xl font-bold text-macaron-brown font-chinese mb-4"></h2>
-            <p class="text-gray-500 mb-6">请输入你的生日作为密码 (格式: MMDD)</p>
-            <input type="password" id="password-input" class="w-full border-2 border-gray-200 p-3 rounded-lg text-center text-lg focus:outline-none focus:border-macaron-pink" placeholder="MMDD">
-            <p id="error-message" class="text-red-500 mt-2 h-4"></p>
-            <div class="flex gap-4 mt-4">
-                <button onclick="hidePasswordPrompt()" class="w-full bg-gray-300 text-gray-700 py-2 rounded-xl hover:bg-gray-400 transition-colors">返回</button>
-                <button onclick="checkPassword()" class="w-full bg-macaron-pink text-white py-2 rounded-xl hover:bg-opacity-80 transition-colors">确认</button>
-            </div>
-        </div>
-    </div>
+<body class="flex items-center justify-center min-h-screen p-4">
 
     <!-- 主内容区 -->
-    <main id="main-content" class="hidden w-full max-w-4xl mx-auto p-4 md:p-8">
-        <div class="bg-soft-pink-glass backdrop-blur-sm rounded-3xl shadow-lg p-6 md:p-10 space-y-8 fade-in">
+    <main id="main-content" class="w-full max-w-4xl mx-auto">
+        <div class="bg-glass-effect rounded-3xl p-6 md:p-10 space-y-8 fade-in">
             <!-- 头部 -->
             <header class="text-center">
-                <h1 class="text-4xl md:text-5xl font-bold text-macaron-brown font-chinese">💖 我们的恋爱小屋 💖</h1>
-                <p class="text-gray-500 mt-2">记录我们在一起的每分每秒</p>
+                <h1 class="text-4xl md:text-5xl font-bold text-sweet-brown font-chinese">💖 我们的恋爱小屋 💖</h1>
+                <p class="text-gray-500 mt-2 text-lg">记录我们在一起的每分每秒</p>
             </header>
+            
+            <!-- 新增的用户选择器 -->
+            <section id="user-selector" class="text-center">
+                <h3 class="font-bold text-lg mb-4 text-sweet-brown font-chinese">今天是谁在记录呀？</h3>
+                <div class="inline-flex rounded-xl shadow-sm">
+                    <button id="select-her" onclick="selectUser('her')" class="user-select-btn px-6 py-3 rounded-l-xl transition-all duration-300">
+                        <span class="text-xl mr-2">👑</span> 小一二
+                    </button>
+                    <button id="select-him" onclick="selectUser('him')" class="user-select-btn px-6 py-3 rounded-r-xl transition-all duration-300">
+                        <span class="text-xl mr-2">🛡️</span> 小布布
+                    </button>
+                </div>
+            </section>
 
             <!-- 恋爱计时器 -->
-            <section id="love-timer" class="bg-macaron-yellow p-6 rounded-2xl shadow-md text-center">
-                 <h2 class="text-xl font-bold text-macaron-brown mb-4 font-chinese flex items-center justify-center gap-2">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-macaron-brown"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+            <section id="love-timer" class="bg-sweet-yellow p-6 rounded-2xl shadow-md text-center">
+                 <h2 class="text-xl font-bold text-sweet-brown mb-4 font-chinese flex items-center justify-center gap-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-sweet-brown"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
                     我们已经相爱了
                 </h2>
-                <div id="timer-display" class="flex justify-center items-center space-x-2 md:space-x-4 text-macaron-brown">
-                    <div class="text-center"><span id="days" class="text-4xl md:text-6xl font-bold">0</span><p class="text-sm">天</p></div>
+                <div id="timer-display" class="flex justify-center items-center space-x-2 md:space-x-4 text-sweet-brown">
+                    <div class="text-center"><span id="days" class="text-4xl md:text-6xl font-bold">0</span><p>天</p></div>
                     <div class="text-4xl md:text-6xl font-bold">:</div>
-                    <div class="text-center"><span id="hours" class="text-4xl md:text-6xl font-bold">0</span><p class="text-sm">时</p></div>
+                    <div class="text-center"><span id="hours" class="text-4xl md:text-6xl font-bold">0</span><p>时</p></div>
                     <div class="text-4xl md:text-6xl font-bold">:</div>
-                    <div class="text-center"><span id="minutes" class="text-4xl md:text-6xl font-bold">0</span><p class="text-sm">分</p></div>
+                    <div class="text-center"><span id="minutes" class="text-4xl md:text-6xl font-bold">0</span><p>分</p></div>
                     <div class="text-4xl md:text-6xl font-bold">:</div>
-                    <div class="text-center"><span id="seconds" class="text-4xl md:text-6xl font-bold">0</span><p class="text-sm">秒</p></div>
+                    <div class="text-center"><span id="seconds" class="text-4xl md:text-6xl font-bold">0</span><p>秒</p></div>
                 </div>
-                <div class="mt-4 text-gray-500 text-sm">
+                <div class="mt-4 text-gray-500">
                     始于: <span id="start-date-display">...</span>
                 </div>
-                <button onclick="toggleSetDate()" class="mt-4 bg-white text-macaron-brown px-4 py-2 rounded-lg shadow-sm hover:bg-gray-50 transition">设置/修改纪念日</button>
+                <button onclick="toggleSetDate()" class="mt-4 bg-white text-sweet-brown px-4 py-2 rounded-lg shadow-sm hover:bg-gray-50 transition">设置/修改纪念日</button>
                 <div id="date-setter" class="hidden mt-4 space-y-2 max-w-sm mx-auto">
-                    <input type="datetime-local" id="love-start-date" class="w-full border-2 border-gray-200 p-2 rounded-lg focus:outline-none focus:border-macaron-blue">
-                    <button onclick="setLoveStartDate()" class="w-full bg-macaron-blue text-white py-2 rounded-lg hover:bg-opacity-80 transition">保存</button>
+                    <input type="datetime-local" id="love-start-date" class="w-full border-2 border-gray-200 p-2 rounded-lg focus:outline-none focus:border-sweet-blue">
+                    <button onclick="setLoveStartDate()" class="w-full bg-sweet-blue text-white py-2 rounded-lg hover:bg-opacity-80 transition">保存</button>
                 </div>
             </section>
 
             <!-- 恋爱日记 -->
             <section id="love-diary">
-                <h2 class="text-2xl font-bold text-macaron-brown text-center mb-6 font-chinese flex items-center justify-center gap-2">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-macaron-brown"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"></path><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"></path></svg>
+                <h2 class="text-2xl font-bold text-sweet-brown text-center mb-6 font-chinese flex items-center justify-center gap-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-sweet-brown"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"></path><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"></path></svg>
                     我们的甜蜜日记
                 </h2>
                 
                 <div class="bg-warm-white p-6 rounded-2xl shadow-md mb-8">
-                    <h3 class="font-bold text-lg mb-4 text-macaron-brown font-chinese">写下今天的故事...</h3>
-                    <textarea id="diary-text" rows="4" class="w-full border-2 border-gray-200 p-3 rounded-lg focus:outline-none focus:border-macaron-green" placeholder="今天发生了什么有趣的事呢？"></textarea>
+                    <h3 class="font-bold text-lg mb-4 text-sweet-brown font-chinese">写下今天的故事...</h3>
+                    <textarea id="diary-text" rows="4" class="w-full border-2 border-gray-200 p-3 rounded-lg focus:outline-none focus:border-sweet-pink" placeholder="今天发生了什么有趣的事呢？"></textarea>
                     
                     <input type="file" id="diary-image-upload" class="hidden" accept="image/*" onchange="previewImage(event)">
                     
@@ -116,10 +122,10 @@
                     </div>
 
                     <div class="flex justify-between items-center mt-4">
-                        <button onclick="triggerFileUpload()" title="添加图片" class="bg-macaron-pink text-white w-12 h-12 flex items-center justify-center rounded-full hover:bg-opacity-80 transition transform hover:scale-110">
+                        <button onclick="triggerFileUpload()" title="添加图片" class="bg-sweet-pink text-white w-12 h-12 flex items-center justify-center rounded-full hover:bg-opacity-80 transition transform hover:scale-110">
                             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z"></path><circle cx="12" cy="13" r="3"></circle></svg>
                         </button>
-                        <button id="publish-btn" onclick="addDiaryEntry()" class="bg-macaron-green text-white py-3 px-8 rounded-xl font-bold hover:bg-opacity-80 transition-all duration-300 transform hover:scale-105">发布日记</button>
+                        <button id="publish-btn" onclick="addDiaryEntry()" class="bg-sweet-blue text-white py-3 px-8 rounded-xl font-bold hover:bg-opacity-80 transition-all duration-300 transform hover:scale-105">发布日记</button>
                     </div>
                 </div>
 
@@ -131,18 +137,16 @@
     <!-- 通用消息弹窗 -->
     <div id="message-modal" class="fixed inset-0 z-50 hidden items-center justify-center modal-bg transition-opacity duration-300">
         <div class="bg-white p-6 rounded-2xl shadow-2xl text-center w-11/12 max-w-sm">
-            <p id="message-modal-text" class="text-gray-700 mb-6"></p>
+            <p id="message-modal-text" class="text-gray-700 mb-6 text-lg"></p>
             <div id="message-modal-buttons" class="flex gap-4 justify-center"></div>
         </div>
     </div>
-
 
     <script>
     window.addEventListener('DOMContentLoaded', function() {
         // --- LeanCloud 集成 ---
         const APP_ID = "yTrfbPzoiL7ULr4D1iAOoDFn-gzGzoHsz";
         const APP_KEY = "XkqnzXsCOCRDoUTyTUNvt9sa";
-        // 国内节点需要设置 Server URL
         const SERVER_URL = "https://ytrfbpzo.lc-cn-n1-shared.com";
 
         AV.init({
@@ -152,15 +156,12 @@
         });
 
         // --- 全局变量和 DOM 元素 ---
-        const passwords = { her: '1205', him: '0805' };
         let currentUser = null;
         let selectedFile = null;
         let confirmCallback = null;
         let diaryLiveQuery;
         let settingsLiveQuery;
 
-        const loginModal = document.getElementById('login-modal');
-        const passwordPrompt = document.getElementById('password-prompt');
         const mainContent = document.getElementById('main-content');
         const diaryText = document.getElementById('diary-text');
         const diaryImageUpload = document.getElementById('diary-image-upload');
@@ -172,7 +173,7 @@
         const messageModalText = document.getElementById('message-modal-text');
         const messageModalButtons = document.getElementById('message-modal-buttons');
         
-        // --- 登录与认证 ---
+        // --- 认证与初始化 ---
         async function connectToCloud() {
             try {
                 const user = AV.User.current();
@@ -182,6 +183,7 @@
                 } else {
                     console.log("Already authenticated with LeanCloud.");
                 }
+                initApp(); // 连接成功后初始化应用
             } catch (error) {
                 console.error("LeanCloud connection failed:", error);
                 showAlert("无法建立安全的云端连接，请检查网络并刷新页面。");
@@ -190,37 +192,24 @@
         
         connectToCloud();
 
-        function showPasswordPrompt(user) {
+        function selectUser(user) {
             currentUser = user;
-            document.getElementById('password-title').textContent = user === 'her' ? '欢迎小一二回家' : '欢迎小布布回家';
-            passwordPrompt.style.display = 'flex';
-        }
-
-        function hidePasswordPrompt() {
-            passwordPrompt.style.display = 'none';
-        }
-
-        function checkPassword() {
-            const passwordInput = document.getElementById('password-input');
-            const errorMessage = document.getElementById('error-message');
-            if (passwordInput.value === passwords[currentUser]) {
-                loginModal.style.display = 'none';
-                passwordPrompt.style.display = 'none';
-                mainContent.style.display = 'block';
-                initApp();
+            const btnHer = document.getElementById('select-her');
+            const btnHim = document.getElementById('select-him');
+            if (user === 'her') {
+                btnHer.classList.add('selected');
+                btnHim.classList.remove('selected');
             } else {
-                errorMessage.textContent = '密码不对哦，再想想~';
-                setTimeout(() => { errorMessage.textContent = ''; }, 2000);
+                btnHim.classList.add('selected');
+                btnHer.classList.remove('selected');
             }
         }
 
-        // --- 初始化应用 ---
         function initApp() {
             listenForDiaryUpdates();
             listenForDateUpdates();
         }
         
-        // --- 统一获取所有日记并渲染 ---
         async function fetchAndRenderDiaries() {
              const query = new AV.Query('Diary');
              query.descending('createdAt');
@@ -229,7 +218,7 @@
                 const entries = results.map(d => ({
                     id: d.id,
                     ...d.attributes,
-                    createdAt: d.createdAt // 确保时间戳存在
+                    createdAt: d.createdAt
                 }));
                 renderDiary(entries);
              } catch(error) {
@@ -237,9 +226,11 @@
              }
         }
 
-
-        // --- 日记数据库逻辑 ---
         async function addDiaryEntry() {
+            if (!currentUser) {
+                showAlert('要先选择是谁在写日记哦~');
+                return;
+            }
             const text = diaryText.value.trim();
             if (!text && !selectedFile) {
                 showAlert('日记内容和图片至少要有一个哦！');
@@ -298,7 +289,7 @@
             diaryLiveQuery.on('update', fetchAndRenderDiaries);
             diaryLiveQuery.on('delete', fetchAndRenderDiaries);
             
-            fetchAndRenderDiaries(); // 首次加载
+            fetchAndRenderDiaries();
         }
         
         function deleteDiaryEntry(id) {
@@ -323,8 +314,8 @@
                 const entryEl = document.createElement('div');
                 const isHer = entry.author === 'her';
                 const authorInfo = isHer
-                    ? { name: '小一二', icon: '👑', borderColor: 'border-macaron-pink' }
-                    : { name: '小布布', icon: '🛡️', borderColor: 'border-macaron-blue' };
+                    ? { name: '小一二', icon: '👑', borderColor: 'border-sweet-pink' }
+                    : { name: '小布布', icon: '🛡️', borderColor: 'border-sweet-blue' };
 
                 entryEl.className = `bg-warm-white p-5 rounded-2xl shadow-md fade-in border-l-4 ${authorInfo.borderColor}`;
                 
@@ -337,20 +328,19 @@
                         <div>
                              <div class="flex items-center gap-2">
                                 <span class="text-xl">${authorInfo.icon}</span>
-                                <span class="font-bold text-macaron-brown font-chinese text-lg">${authorInfo.name}的日记</span>
+                                <span class="font-bold text-sweet-brown font-chinese text-lg">${authorInfo.name}的日记</span>
                             </div>
                             <p class="text-xs text-gray-400 mt-1 ml-2">${timeString}</p>
                         </div>
                         <button onclick="deleteDiaryEntry('${entry.id}')" class="text-gray-400 hover:text-red-500 text-2xl font-bold">&times;</button>
                     </div>
-                    <p class="text-gray-800 mt-4 whitespace-pre-wrap pl-2">${entry.text || ''}</p>
+                    <p class="text-gray-800 mt-4 whitespace-pre-wrap pl-2 text-lg">${entry.text || ''}</p>
                     ${imageHtml}
                 `;
                 diaryEntriesContainer.appendChild(entryEl);
             });
         }
 
-        // --- 图片预览逻辑 ---
         function triggerFileUpload() { diaryImageUpload.click(); }
         function previewImage(event) {
             const file = event.target.files[0];
@@ -371,7 +361,6 @@
             imagePreviewContainer.classList.add('hidden');
         }
 
-        // --- 计时器逻辑 (LeanCloud 同步) ---
         let loveStartDate;
         let timerInterval;
 
@@ -395,16 +384,14 @@
             if (settingsLiveQuery) await settingsLiveQuery.unsubscribe();
             const query = new AV.Query('Settings');
             
-            // 首次加载
             try {
                 const setting = await query.first();
                 updateTimerUI(setting ? setting.get('startDate') : null);
             } catch(error) {
                 console.error("Initial date fetch failed:", error);
-                updateTimerUI(null); // Fallback
+                updateTimerUI(null);
             }
 
-            // 实时监听
             try {
                 settingsLiveQuery = await query.subscribe();
             } catch(e) {
@@ -444,10 +431,9 @@
             document.getElementById('date-setter').classList.toggle('hidden'); 
         }
 
-        // --- 自定义弹窗逻辑 ---
         function showAlert(message) {
             messageModalText.textContent = message;
-            messageModalButtons.innerHTML = `<button onclick="hideMessageModal()" class="w-full bg-macaron-pink text-white py-2 px-6 rounded-xl hover:bg-opacity-80 transition-colors">好的</button>`;
+            messageModalButtons.innerHTML = `<button onclick="hideMessageModal()" class="w-full bg-sweet-pink text-white py-2 px-6 rounded-xl hover:bg-opacity-80 transition-colors">好的</button>`;
             messageModal.style.display = 'flex';
         }
 
@@ -460,7 +446,7 @@
             messageModalText.textContent = message;
             messageModalButtons.innerHTML = `
                 <button onclick="hideMessageModal()" class="w-1/2 bg-gray-300 text-gray-700 py-2 rounded-xl hover:bg-gray-400 transition-colors">取消</button>
-                <button onclick="executeConfirm()" class="w-1/2 bg-macaron-pink text-white py-2 rounded-xl hover:bg-opacity-80 transition-colors">确认</button>
+                <button onclick="executeConfirm()" class="w-1/2 bg-sweet-pink text-white py-2 rounded-xl hover:bg-opacity-80 transition-colors">确认</button>
             `;
             messageModal.style.display = 'flex';
         }
@@ -473,10 +459,7 @@
             confirmCallback = null;
         }
 
-        // 将需要从 HTML 调用的函数暴露到全局
-        window.showPasswordPrompt = showPasswordPrompt;
-        window.hidePasswordPrompt = hidePasswordPrompt;
-        window.checkPassword = checkPassword;
+        window.selectUser = selectUser;
         window.toggleSetDate = toggleSetDate;
         window.setLoveStartDate = setLoveStartDate;
         window.triggerFileUpload = triggerFileUpload;
