@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>臭亨臭琦的恋爱小屋</title>
+    <title>我们的恋爱小屋</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -42,7 +42,7 @@
     <!-- 登录遮罩层 -->
     <div id="login-modal" class="fixed inset-0 z-50 flex items-center justify-center modal-bg transition-opacity duration-300">
         <div class="bg-white p-8 rounded-2xl shadow-2xl text-center w-11/12 max-w-sm">
-            <h2 class="text-3xl font-bold text-macaron-brown font-chinese mb-4">进入我们的小窝</h2>
+            <h2 class="text-3xl font-bold text-macaron-brown font-chinese mb-4">进入我们的爱巢</h2>
             <p class="text-gray-500 mb-6">请选择你的身份~</p>
             <div class="space-y-4">
                 <button onclick="showPasswordPrompt('her')" class="w-full bg-macaron-pink text-white py-3 rounded-xl font-bold text-lg hover:bg-opacity-80 transition-all duration-300 transform hover:scale-105">我是女生</button>
@@ -71,11 +71,11 @@
         <div class="bg-soft-pink-glass backdrop-blur-sm rounded-3xl shadow-lg p-6 md:p-10 space-y-8 fade-in">
             <!-- 头部 -->
             <header class="text-center">
-                <h1 class="text-4xl md:text-5xl font-bold text-macaron-brown font-chinese">💖 臭亨臭琦的恋爱小屋 💖</h1>
+                <h1 class="text-4xl md:text-5xl font-bold text-macaron-brown font-chinese">💖 我们的恋爱小屋 💖</h1>
                 <p class="text-gray-500 mt-2">记录我们在一起的每分每秒</p>
             </header>
 
-            <!-- 恋爱计时器 (这部分数据保留在本地) -->
+            <!-- 恋爱计时器 (云端同步) -->
             <section id="love-timer" class="bg-macaron-yellow p-6 rounded-2xl shadow-md text-center">
                  <h2 class="text-xl font-bold text-macaron-brown mb-4 font-chinese flex items-center justify-center gap-2">
                     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-macaron-brown"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
@@ -91,7 +91,7 @@
                     <div class="text-center"><span id="seconds" class="text-4xl md:text-6xl font-bold">0</span><p class="text-sm">秒</p></div>
                 </div>
                 <div class="mt-4 text-gray-500 text-sm">
-                    始于: <span id="start-date-display"></span>
+                    始于: <span id="start-date-display">...</span>
                 </div>
                 <button onclick="toggleSetDate()" class="mt-4 bg-white text-macaron-brown px-4 py-2 rounded-lg shadow-sm hover:bg-gray-50 transition">设置/修改纪念日</button>
                 <div id="date-setter" class="hidden mt-4 space-y-2 max-w-sm mx-auto">
@@ -137,7 +137,8 @@
     <script type="module">
         // 引入 Firebase 服务
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-        import { getFirestore, collection, addDoc, onSnapshot, query, orderBy, serverTimestamp, doc, deleteDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+        import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+        import { getFirestore, collection, addDoc, onSnapshot, query, orderBy, serverTimestamp, doc, deleteDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
         // ===================================================================================
         // ======================== 🔥 你的专属配置已填充完毕 🔥 ========================
@@ -161,6 +162,7 @@
         // 初始化 Firebase
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
+        const auth = getAuth(app);
 
         // --- 全局变量和 DOM 元素 ---
         const passwords = { her: '1205', him: '0805' };
@@ -189,10 +191,24 @@
         window.addDiaryEntry = addDiaryEntry;
         window.deleteDiaryEntry = deleteDiaryEntry;
 
-        // --- 登录逻辑 ---
+        // --- 登录与认证 ---
+        // 页面加载时，自动进行匿名登录以建立稳定连接
+        signInAnonymously(auth).catch((error) => {
+            console.error("Anonymous sign-in failed:", error);
+            alert("无法建立安全的云端连接，请检查网络并刷新页面。");
+        });
+
+        // 监听认证状态
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                console.log("Authenticated anonymously with UID:", user.uid);
+                // 认证成功，但UI仍由密码控制
+            }
+        });
+
         function showPasswordPrompt(user) {
             currentUser = user;
-            document.getElementById('password-title').textContent = user === 'her' ? '欢迎小一二回家' : '欢迎我的布布';
+            document.getElementById('password-title').textContent = user === 'her' ? '欢迎小一二回家' : '欢迎小布布回家';
             passwordPrompt.style.display = 'flex';
         }
 
@@ -207,7 +223,7 @@
                 loginModal.style.display = 'none';
                 passwordPrompt.style.display = 'none';
                 mainContent.style.display = 'block';
-                initApp();
+                initApp(); // 认证成功后初始化应用
             } else {
                 errorMessage.textContent = '密码不对哦，再想想~';
                 setTimeout(() => { errorMessage.textContent = ''; }, 2000);
@@ -216,7 +232,7 @@
 
         // --- 初始化应用 ---
         function initApp() {
-            loadLoveTimerFromLocal();
+            listenForDateUpdates(); // 替换本地加载
             listenForDiaryUpdates();
         }
 
@@ -247,13 +263,10 @@
         // --- 日记 Firestore 逻辑 ---
         async function addDiaryEntry() {
             const text = diaryText.value.trim();
-            
             if (!text && !selectedFile) {
                 alert('日记内容和图片至少要有一个哦！');
                 return;
             }
-
-            // 禁用按钮并显示加载状态
             publishBtn.disabled = true;
             publishBtn.textContent = '发布中...';
             publishBtn.classList.add('btn-disabled');
@@ -261,31 +274,26 @@
             let imageUrl = null;
             if (selectedFile) {
                 imageUrl = await uploadImageToImgBB(selectedFile);
-                if (!imageUrl) { // 如果上传失败
+                if (!imageUrl) {
                     publishBtn.disabled = false;
                     publishBtn.textContent = '发布日记';
                     publishBtn.classList.remove('btn-disabled');
-                    return; // 终止发布流程
+                    return;
                 }
             }
-
             try {
                 await addDoc(collection(db, "diaries"), {
                     text: text,
                     imageUrl: imageUrl,
                     author: currentUser,
-                    timestamp: serverTimestamp() // 使用服务器时间，保证准确
+                    timestamp: serverTimestamp()
                 });
-
-                // 清空输入
                 diaryText.value = '';
                 removeImage();
-
             } catch (error) {
                 console.error("Error adding document: ", error);
                 alert('发布日记失败，请检查网络连接。');
             } finally {
-                // 恢复按钮状态
                 publishBtn.disabled = false;
                 publishBtn.textContent = '发布日记';
                 publishBtn.classList.remove('btn-disabled');
@@ -294,7 +302,6 @@
 
         function listenForDiaryUpdates() {
             const q = query(collection(db, "diaries"), orderBy("timestamp", "desc"));
-            
             onSnapshot(q, (querySnapshot) => {
                 const entries = [];
                 querySnapshot.forEach((doc) => {
@@ -321,19 +328,17 @@
                 diaryEntriesContainer.innerHTML = `<div class="text-center text-gray-400 py-8 font-chinese">还没有日记呢，快来写下第一篇吧！</div>`;
                 return;
             }
-
             entries.forEach(entry => {
                 const entryEl = document.createElement('div');
                 const isHer = entry.author === 'her';
                 const authorInfo = isHer
-                    ? { name: '小公主', icon: '👑', borderColor: 'border-macaron-pink' }
-                    : { name: '大骑士', icon: '🛡️', borderColor: 'border-macaron-blue' };
+                    ? { name: '小一二', icon: '👑', borderColor: 'border-macaron-pink' }
+                    : { name: '小布布', icon: '🛡️', borderColor: 'border-macaron-blue' };
 
                 entryEl.className = `bg-warm-white p-5 rounded-2xl shadow-md fade-in border-l-4 ${authorInfo.borderColor}`;
                 
                 const date = entry.timestamp ? entry.timestamp.toDate() : new Date();
                 const timeString = date.toLocaleString('zh-CN', { year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' });
-                
                 const imageHtml = entry.imageUrl ? `<img src="${entry.imageUrl}" alt="日记图片" class="mt-4 rounded-lg w-full diary-image">` : '';
 
                 entryEl.innerHTML = `
@@ -355,23 +360,19 @@
         }
 
         // --- 图片预览逻辑 ---
-        function triggerFileUpload() {
-            diaryImageUpload.click();
-        }
-
+        function triggerFileUpload() { diaryImageUpload.click(); }
         function previewImage(event) {
             const file = event.target.files[0];
             if (file) {
-                selectedFile = file; // 存储文件对象
+                selectedFile = file;
                 const reader = new FileReader();
-                reader.onload = function(e) {
+                reader.onload = (e) => {
                     imagePreview.src = e.target.result;
                     imagePreviewContainer.classList.remove('hidden');
-                }
+                };
                 reader.readAsDataURL(file);
             }
         }
-
         function removeImage() {
             selectedFile = null;
             diaryImageUpload.value = '';
@@ -379,25 +380,42 @@
             imagePreviewContainer.classList.add('hidden');
         }
 
-        // --- 计时器逻辑 (本地存储) ---
+        // --- 计时器逻辑 (云端同步) ---
         let loveStartDate;
         let timerInterval;
+        const settingsDocRef = doc(db, "settings", "loveInfo");
 
-        function toggleSetDate() { document.getElementById('date-setter').classList.toggle('hidden'); }
-        
-        function setLoveStartDate() {
+        function listenForDateUpdates() {
+            onSnapshot(settingsDocRef, (docSnap) => {
+                let startDateISO;
+                if (docSnap.exists()) {
+                    startDateISO = docSnap.data().startDate;
+                }
+                // 如果云端没有设置，或设置无效，使用默认日期
+                loveStartDate = startDateISO ? new Date(startDateISO) : new Date('2023-01-01T00:00:00');
+                startLoveTimer();
+            });
+        }
+
+        async function setLoveStartDate() {
             const dateValue = document.getElementById('love-start-date').value;
             if (dateValue) {
-                loveStartDate = new Date(dateValue);
-                localStorage.setItem('loveApp_startDate', loveStartDate.toISOString());
-                startLoveTimer();
-                toggleSetDate();
+                const newStartDate = new Date(dateValue);
+                try {
+                    await setDoc(settingsDocRef, { startDate: newStartDate.toISOString() });
+                    // onSnapshot会自动更新UI，所以这里只需要关闭输入框
+                    toggleSetDate();
+                } catch (error) {
+                    console.error("Error saving start date: ", error);
+                    alert("保存纪念日失败，请稍后再试。");
+                }
             }
         }
 
         function startLoveTimer() {
             if (timerInterval) clearInterval(timerInterval);
             if (!loveStartDate) return;
+            
             const update = () => {
                 const now = new Date();
                 const diff = now - loveStartDate;
@@ -410,11 +428,9 @@
             timerInterval = setInterval(update, 1000);
             document.getElementById('start-date-display').textContent = loveStartDate.toLocaleString('zh-CN', { year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' });
         }
-
-        function loadLoveTimerFromLocal() {
-            const savedDate = localStorage.getItem('loveApp_startDate');
-            loveStartDate = savedDate ? new Date(savedDate) : new Date('2023-01-01T00:00:00');
-            startLoveTimer();
+        
+        function toggleSetDate() { 
+            document.getElementById('date-setter').classList.toggle('hidden'); 
         }
 
     </script>
