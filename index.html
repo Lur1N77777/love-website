@@ -5,7 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>我们的恋爱小屋</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://img.cloud.tencent.com/qcloud/cloudbase/1.10.0/cloudbase.full.js"></script>
+    <!-- 引入 LeanCloud SDK -->
+    <script src="https://cdn.jsdelivr.net/npm/leancloud-storage@4.13/dist/av-live-query-min.js"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700&family=Lxgw+WenKai+Lite:wght@400;700&display=swap" rel="stylesheet">
@@ -126,27 +127,37 @@
             </section>
         </div>
     </main>
+    
+    <!-- 通用消息弹窗 -->
+    <div id="message-modal" class="fixed inset-0 z-50 hidden items-center justify-center modal-bg transition-opacity duration-300">
+        <div class="bg-white p-6 rounded-2xl shadow-2xl text-center w-11/12 max-w-sm">
+            <p id="message-modal-text" class="text-gray-700 mb-6"></p>
+            <div id="message-modal-buttons" class="flex gap-4 justify-center"></div>
+        </div>
+    </div>
+
 
     <script>
-        // --- 腾讯云开发 TCB 集成 ---
-        const app = cloudbase.init({
-            // ===================================================================================
-            // =================== ⚠️ 请将这里替换成你的腾讯云环境ID ⚠️ ===================
-            // ===================================================================================
-            env: 'cloud1-4g2ivcfs013f7345' 
-            // ===================================================================================
-            // ===================================================================================
+    window.addEventListener('DOMContentLoaded', function() {
+        // --- LeanCloud 集成 ---
+        const APP_ID = "yTrfbPzoiL7ULr4D1iAOoDFn-gzGzoHsz";
+        const APP_KEY = "XkqnzXsCOCRDoUTyTUNvt9sa";
+        // 国内节点需要设置 Server URL
+        const SERVER_URL = "https://ytrfbpzo.lc-cn-n1-shared.com";
+
+        AV.init({
+            appId: APP_ID,
+            appKey: APP_KEY,
+            serverURL: SERVER_URL
         });
-        const auth = app.auth();
-        const db = app.database();
-        const _ = db.command;
 
         // --- 全局变量和 DOM 元素 ---
         const passwords = { her: '1205', him: '0805' };
         let currentUser = null;
         let selectedFile = null;
-        let diaryListener = null;
-        let dateListener = null;
+        let confirmCallback = null;
+        let diaryLiveQuery;
+        let settingsLiveQuery;
 
         const loginModal = document.getElementById('login-modal');
         const passwordPrompt = document.getElementById('password-prompt');
@@ -157,25 +168,27 @@
         const imagePreviewContainer = document.getElementById('image-preview-container');
         const imagePreview = document.getElementById('image-preview');
         const publishBtn = document.getElementById('publish-btn');
+        const messageModal = document.getElementById('message-modal');
+        const messageModalText = document.getElementById('message-modal-text');
+        const messageModalButtons = document.getElementById('message-modal-buttons');
         
         // --- 登录与认证 ---
         async function connectToCloud() {
             try {
-                // 检查登录状态，如果未登录则进行匿名登录
-                const loginState = await auth.getLoginState();
-                if (!loginState) {
-                    await auth.anonymousAuthProvider().signIn();
-                    console.log("Authenticated with TCB anonymously.");
+                const user = AV.User.current();
+                if (!user) {
+                    await AV.User.loginAnonymously();
+                    console.log("Authenticated with LeanCloud anonymously.");
                 } else {
-                    console.log("Already authenticated with TCB.");
+                    console.log("Already authenticated with LeanCloud.");
                 }
             } catch (error) {
-                console.error("TCB anonymous sign-in failed:", error);
-                alert("无法建立安全的云端连接，请检查网络并刷新页面。");
+                console.error("LeanCloud connection failed:", error);
+                showAlert("无法建立安全的云端连接，请检查网络并刷新页面。");
             }
         }
         
-        window.onload = connectToCloud;
+        connectToCloud();
 
         function showPasswordPrompt(user) {
             currentUser = user;
@@ -203,32 +216,33 @@
 
         // --- 初始化应用 ---
         function initApp() {
-            listenForDateUpdates();
             listenForDiaryUpdates();
+            listenForDateUpdates();
+        }
+        
+        // --- 统一获取所有日记并渲染 ---
+        async function fetchAndRenderDiaries() {
+             const query = new AV.Query('Diary');
+             query.descending('createdAt');
+             try {
+                const results = await query.find();
+                const entries = results.map(d => ({
+                    id: d.id,
+                    ...d.attributes,
+                    createdAt: d.createdAt // 确保时间戳存在
+                }));
+                renderDiary(entries);
+             } catch(error) {
+                 console.error("Failed to fetch diaries:", error);
+             }
         }
 
-        // --- 图片上传到 TCB 云存储 ---
-        async function uploadImageToTCB(file) {
-            try {
-                const result = await app.uploadFile({
-                    cloudPath: `diary-images/${Date.now()}-${file.name}`,
-                    filePath: file
-                });
-                // 获取临时链接用于显示
-                const fileListRes = await app.getTempFileURL({ fileList: [result.fileID] });
-                return fileListRes.fileList[0].tempFileURL;
-            } catch (error) {
-                console.error('TCB upload failed:', error);
-                alert('图片上传时发生错误，请稍后再试。');
-                return null;
-            }
-        }
 
         // --- 日记数据库逻辑 ---
         async function addDiaryEntry() {
             const text = diaryText.value.trim();
             if (!text && !selectedFile) {
-                alert('日记内容和图片至少要有一个哦！');
+                showAlert('日记内容和图片至少要有一个哦！');
                 return;
             }
             publishBtn.disabled = true;
@@ -237,28 +251,32 @@
 
             let imageUrl = null;
             if (selectedFile) {
-                imageUrl = await uploadImageToTCB(selectedFile);
-                if (!imageUrl) {
+                 try {
+                    const file = new AV.File(selectedFile.name, selectedFile);
+                    const savedFile = await file.save();
+                    imageUrl = savedFile.url();
+                 } catch(error) {
+                    console.error('LeanCloud upload failed:', error);
+                    showAlert('图片上传时发生错误，请稍后再试。');
                     publishBtn.disabled = false;
                     publishBtn.textContent = '发布日记';
                     publishBtn.classList.remove('btn-disabled');
                     return;
-                }
+                 }
             }
+            
             try {
-                await db.collection('diaries').add({
-                    data: {
-                        text: text,
-                        imageUrl: imageUrl,
-                        author: currentUser,
-                        timestamp: db.serverDate()
-                    }
-                });
+                const Diary = AV.Object.extend('Diary');
+                const diary = new Diary();
+                diary.set('text', text);
+                diary.set('imageUrl', imageUrl);
+                diary.set('author', currentUser);
+                await diary.save();
                 diaryText.value = '';
                 removeImage();
             } catch (error) {
                 console.error("Error adding document: ", error);
-                alert('发布日记失败，请检查网络连接。');
+                showAlert('发布日记失败，请检查网络连接。');
             } finally {
                 publishBtn.disabled = false;
                 publishBtn.textContent = '发布日记';
@@ -266,28 +284,33 @@
             }
         }
 
-        function listenForDiaryUpdates() {
-            if(diaryListener) diaryListener.close(); // 防止重复监听
-            diaryListener = db.collection('diaries').orderBy('timestamp', 'desc').watch({
-                onChange: (snapshot) => {
-                    const entries = snapshot.docs.map(doc => ({ id: doc._id, ...doc }));
-                    renderDiary(entries);
-                },
-                onError: (error) => {
-                    console.error('Diary listener error:', error);
-                }
-            });
+        async function listenForDiaryUpdates() {
+            if (diaryLiveQuery) await diaryLiveQuery.unsubscribe();
+            const query = new AV.Query('Diary');
+            try {
+                diaryLiveQuery = await query.subscribe();
+            } catch(e) {
+                console.error("Failed to subscribe to diaries:", e);
+                return;
+            }
+            
+            diaryLiveQuery.on('create', fetchAndRenderDiaries);
+            diaryLiveQuery.on('update', fetchAndRenderDiaries);
+            diaryLiveQuery.on('delete', fetchAndRenderDiaries);
+            
+            fetchAndRenderDiaries(); // 首次加载
         }
         
-        async function deleteDiaryEntry(id) {
-            if(confirm('真的要删除这篇日记吗？这会从云端永久删除哦！')) {
+        function deleteDiaryEntry(id) {
+            showConfirm('真的要删除这篇日记吗？这会从云端永久删除哦！', async () => {
                 try {
-                    await db.collection('diaries').doc(id).remove();
+                    const diary = AV.Object.createWithoutData('Diary', id);
+                    await diary.destroy();
                 } catch(error) {
                     console.error("Error deleting document: ", error);
-                    alert("删除失败，请稍后再试。");
+                    showAlert("删除失败，请稍后再试。");
                 }
-            }
+            });
         }
 
         function renderDiary(entries) {
@@ -305,7 +328,7 @@
 
                 entryEl.className = `bg-warm-white p-5 rounded-2xl shadow-md fade-in border-l-4 ${authorInfo.borderColor}`;
                 
-                const date = entry.timestamp ? new Date(entry.timestamp) : new Date();
+                const date = new Date(entry.createdAt);
                 const timeString = date.toLocaleString('zh-CN', { year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' });
                 const imageHtml = entry.imageUrl ? `<img src="${entry.imageUrl}" alt="日记图片" class="mt-4 rounded-lg w-full diary-image">` : '';
 
@@ -348,25 +371,51 @@
             imagePreviewContainer.classList.add('hidden');
         }
 
-        // --- 计时器逻辑 (TCB 同步) ---
+        // --- 计时器逻辑 (LeanCloud 同步) ---
         let loveStartDate;
         let timerInterval;
 
-        function listenForDateUpdates() {
-            if(dateListener) dateListener.close();
-            dateListener = db.collection('settings').doc('loveInfo').watch({
-                onChange: (snapshot) => {
-                    const doc = snapshot.docs[0];
-                    const startDateISO = doc ? doc.startDate : null;
-                    loveStartDate = startDateISO ? new Date(startDateISO) : new Date('2023-01-01T00:00:00');
-                    startLoveTimer();
-                },
-                onError: (error) => {
-                    console.error('Date listener error:', error);
-                    // 如果没有文档，手动设置默认值
-                    loveStartDate = new Date('2023-01-01T00:00:00');
-                    startLoveTimer();
-                }
+        function updateTimerUI(dateISO) {
+             loveStartDate = dateISO ? new Date(dateISO) : new Date('2023-01-01T00:00:00');
+             if (timerInterval) clearInterval(timerInterval);
+             const update = () => {
+                const now = new Date();
+                const diff = now - loveStartDate;
+                document.getElementById('days').textContent = Math.floor(diff / 864e5);
+                document.getElementById('hours').textContent = String(Math.floor((diff % 864e5) / 36e5)).padStart(2, '0');
+                document.getElementById('minutes').textContent = String(Math.floor((diff % 36e5) / 6e4)).padStart(2, '0');
+                document.getElementById('seconds').textContent = String(Math.floor((diff % 6e4) / 1e3)).padStart(2, '0');
+             };
+             update();
+             timerInterval = setInterval(update, 1000);
+             document.getElementById('start-date-display').textContent = loveStartDate.toLocaleString('zh-CN', { year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+        }
+        
+        async function listenForDateUpdates() {
+            if (settingsLiveQuery) await settingsLiveQuery.unsubscribe();
+            const query = new AV.Query('Settings');
+            
+            // 首次加载
+            try {
+                const setting = await query.first();
+                updateTimerUI(setting ? setting.get('startDate') : null);
+            } catch(error) {
+                console.error("Initial date fetch failed:", error);
+                updateTimerUI(null); // Fallback
+            }
+
+            // 实时监听
+            try {
+                settingsLiveQuery = await query.subscribe();
+            } catch(e) {
+                 console.error("Failed to subscribe to settings:", e);
+                 return;
+            }
+            settingsLiveQuery.on('update', (setting) => {
+                updateTimerUI(setting.get('startDate'));
+            });
+             settingsLiveQuery.on('create', (setting) => {
+                updateTimerUI(setting.get('startDate'));
             });
         }
 
@@ -374,40 +423,54 @@
             const dateValue = document.getElementById('love-start-date').value;
             if (dateValue) {
                 const newStartDate = new Date(dateValue);
+                const query = new AV.Query('Settings');
                 try {
-                    // 使用 set 方法，如果文档不存在则会创建
-                    await db.collection('settings').doc('loveInfo').set({
-                        data:{
-                             startDate: newStartDate.toISOString()
-                        }
-                    });
+                    let setting = await query.first();
+                    if (!setting) {
+                        const Settings = AV.Object.extend('Settings');
+                        setting = new Settings();
+                    }
+                    setting.set('startDate', newStartDate.toISOString());
+                    await setting.save();
                     toggleSetDate();
                 } catch (error) {
                     console.error("Error saving start date: ", error);
-                    alert("保存纪念日失败，请稍后再试。");
+                    showAlert("保存纪念日失败，请稍后再试。");
                 }
             }
-        }
-
-        function startLoveTimer() {
-            if (timerInterval) clearInterval(timerInterval);
-            if (!loveStartDate) return;
-            
-            const update = () => {
-                const now = new Date();
-                const diff = now - loveStartDate;
-                document.getElementById('days').textContent = Math.floor(diff / 864e5);
-                document.getElementById('hours').textContent = String(Math.floor((diff % 864e5) / 36e5)).padStart(2, '0');
-                document.getElementById('minutes').textContent = String(Math.floor((diff % 36e5) / 6e4)).padStart(2, '0');
-                document.getElementById('seconds').textContent = String(Math.floor((diff % 6e4) / 1e3)).padStart(2, '0');
-            };
-            update();
-            timerInterval = setInterval(update, 1000);
-            document.getElementById('start-date-display').textContent = loveStartDate.toLocaleString('zh-CN', { year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' });
         }
         
         function toggleSetDate() { 
             document.getElementById('date-setter').classList.toggle('hidden'); 
+        }
+
+        // --- 自定义弹窗逻辑 ---
+        function showAlert(message) {
+            messageModalText.textContent = message;
+            messageModalButtons.innerHTML = `<button onclick="hideMessageModal()" class="w-full bg-macaron-pink text-white py-2 px-6 rounded-xl hover:bg-opacity-80 transition-colors">好的</button>`;
+            messageModal.style.display = 'flex';
+        }
+
+        function hideMessageModal() {
+            messageModal.style.display = 'none';
+        }
+
+        function showConfirm(message, callback) {
+            confirmCallback = callback;
+            messageModalText.textContent = message;
+            messageModalButtons.innerHTML = `
+                <button onclick="hideMessageModal()" class="w-1/2 bg-gray-300 text-gray-700 py-2 rounded-xl hover:bg-gray-400 transition-colors">取消</button>
+                <button onclick="executeConfirm()" class="w-1/2 bg-macaron-pink text-white py-2 rounded-xl hover:bg-opacity-80 transition-colors">确认</button>
+            `;
+            messageModal.style.display = 'flex';
+        }
+
+        function executeConfirm() {
+            if (confirmCallback) {
+                confirmCallback();
+            }
+            hideMessageModal();
+            confirmCallback = null;
         }
 
         // 将需要从 HTML 调用的函数暴露到全局
@@ -421,7 +484,9 @@
         window.removeImage = removeImage;
         window.addDiaryEntry = addDiaryEntry;
         window.deleteDiaryEntry = deleteDiaryEntry;
-
+        window.hideMessageModal = hideMessageModal;
+        window.executeConfirm = executeConfirm;
+    });
     </script>
 </body>
 </html>
