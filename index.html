@@ -9,26 +9,21 @@
     <script src="https://cdn.jsdelivr.net/npm/leancloud-storage@4.13/dist/av-live-query-min.js"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <!-- 可爱字体 ZCOOL KuaiLe -->
     <link href="https://fonts.googleapis.com/css2?family=Gaegu:wght@400;700&family=ZCOOL+KuaiLe&display=swap" rel="stylesheet">
     <style>
-        html {
-            scroll-behavior: smooth;
-        }
-        body {
-            font-family: 'Gaegu', cursive;
-            background: linear-gradient(170deg, #ffdde1 0%, #ffc4c8 100%);
-            -webkit-tap-highlight-color: transparent;
-        }
-        .font-chinese { font-family: 'ZCOOL KuaiLe', cursive; }
-        .bg-sweet-pink { background-color: #ffafcc; }
-        .bg-sweet-blue { background-color: #a2d2ff; }
-        .bg-sweet-yellow { background-color: #fff1a8; }
-        .text-sweet-brown { color: #7c5c53; }
-        .border-sweet-pink { border-color: #ffafcc; }
-        .border-sweet-blue { border-color: #a2d2ff; }
-        .bg-warm-white { background-color: #FFFCF9; }
+        html { scroll-behavior: smooth; }
+        body { font-family: 'Gaegu', cursive; background-color: #faeee7; -webkit-tap-highlight-color: transparent; }
+        .font-artistic { font-family: 'ZCOOL KuaiLe', cursive; }
+        .text-headline { color: #33272a; }
+        .text-paragraph { color: #594a4e; }
+        .bg-button { background-color: #ff8ba7; }
+        .text-button { color: #33272a; }
+        .bg-card { background-color: #fffffe; }
+        .border-highlight { border-color: #ff8ba7; }
+        .bg-secondary { background-color: #ffc6c7; }
         .bg-glass-effect {
-            background-color: rgba(255, 255, 255, 0.7);
+            background-color: rgba(255, 255, 254, 0.85);
             backdrop-filter: blur(12px);
             -webkit-backdrop-filter: blur(12px);
             border: 1px solid rgba(255, 255, 255, 0.2);
@@ -39,38 +34,34 @@
         .modal-bg { background-color: rgba(0, 0, 0, 0.5); }
         .diary-image { max-height: 300px; object-fit: cover; }
         .btn-disabled { cursor: not-allowed; background-color: #d1d5db; }
-
         .user-select-btn {
-            background-color: #ffffff;
-            color: #a38f85;
+            background-color: #fffffe;
+            color: #594a4e;
             font-size: 1.1rem;
             font-weight: bold;
             border: 2px solid transparent;
         }
         .user-select-btn.selected {
-            border-color: #ffafcc;
-            color: #7c5c53;
+            border-color: #ff8ba7;
+            color: #33272a;
             transform: scale(1.05);
             box-shadow: 0 4px 10px rgba(0,0,0,0.1);
         }
-        
         .comment-input {
-            border: 2px solid #ffdde1;
+            border: 2px solid #ffc6c7;
             font-family: 'Gaegu', cursive;
             transition: all 0.3s;
         }
         .comment-input:focus {
-            border-color: #ffafcc;
-            box-shadow: 0 0 0 3px rgba(255, 175, 204, 0.4);
+            border-color: #ff8ba7;
+            box-shadow: 0 0 0 3px rgba(255, 139, 167, 0.4);
         }
-        .comment-input::placeholder {
-            color: #b2a19b;
-        }
+        .comment-input::placeholder { color: #b2a19b; }
         #month-nav button {
-            background-color: rgba(255, 255, 255, 0.8);
+            background-color: rgba(255, 255, 254, 0.8);
             backdrop-filter: blur(5px);
-            -webkit-backdrop-filter: blur(5px);
         }
+        .text-shadow-custom { text-shadow: 1px 1px 4px rgba(0, 0, 0, 0.1); }
     </style>
 </head>
 <body class="flex items-center justify-center min-h-screen p-4">
@@ -80,13 +71,13 @@
         <div class="bg-glass-effect rounded-3xl p-6 md:p-10 space-y-8 fade-in">
             <!-- 头部 -->
             <header class="text-center">
-                <h1 class="text-4xl md:text-5xl font-bold text-sweet-brown font-chinese">💖 我们的恋爱小屋 💖</h1>
-                <p class="text-gray-500 mt-2 text-lg">记录我们在一起的每分每秒</p>
+                <h1 class="text-5xl md:text-6xl font-artistic text-headline">我们的恋爱小屋</h1>
+                <p class="text-paragraph mt-2 text-lg">记录我们在一起的每分每秒</p>
             </header>
             
             <!-- 用户选择器 -->
             <section id="user-selector" class="text-center">
-                <h3 class="font-bold text-lg mb-4 text-sweet-brown font-chinese">今天是谁在记录呀？</h3>
+                <h3 class="font-bold text-lg mb-4 text-headline font-artistic text-3xl">今天是谁在记录呀？</h3>
                 <div class="inline-flex rounded-xl shadow-sm">
                     <button id="select-her" onclick="selectUser('her')" class="user-select-btn px-6 py-3 rounded-l-xl transition-all duration-300">
                         <span class="text-xl mr-2">👑</span> 小一二
@@ -98,67 +89,55 @@
             </section>
 
             <!-- 恋爱计时器 -->
-            <section id="love-timer" class="bg-sweet-yellow p-6 rounded-2xl shadow-md text-center">
-                 <h2 class="text-xl font-bold text-sweet-brown mb-4 font-chinese flex items-center justify-center gap-2">
-                    我们已经相爱了
-                </h2>
-                <div id="timer-display" class="flex justify-center items-center space-x-2 md:space-x-4 text-sweet-brown">
-                    <div class="text-center"><span id="days" class="text-4xl md:text-6xl font-bold">0</span><p>天</p></div>
-                    <div class="text-4xl md:text-6xl font-bold">:</div>
-                    <div class="text-center"><span id="hours" class="text-4xl md:text-6xl font-bold">0</span><p>时</p></div>
-                    <div class="text-4xl md:text-6xl font-bold">:</div>
-                    <div class="text-center"><span id="minutes" class="text-4xl md:text-6xl font-bold">0</span><p>分</p></div>
-                    <div class="text-4xl md:text-6xl font-bold">:</div>
-                    <div class="text-center"><span id="seconds" class="text-4xl md:text-6xl font-bold">0</span><p>秒</p></div>
+            <section id="love-timer" class="text-center bg-secondary rounded-2xl p-6 shadow-sm">
+                 <h2 class="text-3xl font-artistic text-headline mb-4">我们已经相爱了</h2>
+                <div id="timer-display" class="flex justify-center items-center space-x-2 md:space-x-4 text-headline">
+                    <div class="text-center"><span id="days" class="text-4xl md:text-6xl font-bold text-shadow-custom">0</span><p>天</p></div>
+                    <div class="text-4xl md:text-6xl font-bold text-shadow-custom">:</div>
+                    <div class="text-center"><span id="hours" class="text-4xl md:text-6xl font-bold text-shadow-custom">0</span><p>时</p></div>
+                    <div class="text-4xl md:text-6xl font-bold text-shadow-custom">:</div>
+                    <div class="text-center"><span id="minutes" class="text-4xl md:text-6xl font-bold text-shadow-custom">0</span><p>分</p></div>
+                    <div class="text-4xl md:text-6xl font-bold text-shadow-custom">:</div>
+                    <div class="text-center"><span id="seconds" class="text-4xl md:text-6xl font-bold text-shadow-custom">0</span><p>秒</p></div>
                 </div>
-                <div class="mt-4 text-gray-500">
+                <div class="mt-4 text-paragraph font-bold">
                     始于: <span id="start-date-display">...</span>
                 </div>
-                <button onclick="toggleSetDate()" class="mt-4 bg-white text-sweet-brown px-4 py-2 rounded-lg shadow-sm hover:bg-gray-50 transition">设置/修改纪念日</button>
+                <button onclick="toggleSetDate()" class="mt-4 bg-card text-paragraph px-4 py-2 rounded-lg shadow-sm hover:bg-gray-50 transition">设置/修改纪念日</button>
                 <div id="date-setter" class="hidden mt-4 space-y-2 max-w-sm mx-auto">
-                    <input type="datetime-local" id="love-start-date" class="w-full border-2 border-gray-200 p-2 rounded-lg focus:outline-none focus:border-sweet-blue">
-                    <button onclick="setLoveStartDate()" class="w-full bg-sweet-blue text-white py-2 rounded-lg hover:bg-opacity-80 transition">保存</button>
+                    <input type="datetime-local" id="love-start-date" class="w-full border-2 border-gray-200 p-2 rounded-lg focus:outline-none focus:border-highlight">
+                    <button onclick="setLoveStartDate()" class="w-full bg-button text-button rounded-lg py-2 hover:bg-opacity-90 transition">保存</button>
                 </div>
             </section>
 
             <!-- 恋爱日记 -->
             <section id="love-diary">
-                <h2 class="text-2xl font-bold text-sweet-brown text-center mb-6 font-chinese flex items-center justify-center gap-2">
-                    我们的甜蜜日记
-                </h2>
-                
-                <div class="bg-warm-white p-6 rounded-2xl shadow-md mb-8">
-                    <h3 class="font-bold text-lg mb-4 text-sweet-brown font-chinese">写下今天的故事...</h3>
-                    <textarea id="diary-text" rows="4" class="w-full border-2 border-gray-200 p-3 rounded-lg focus:outline-none focus:border-sweet-pink" placeholder="今天发生了什么有趣的事呢？"></textarea>
-                    
+                <h2 class="text-4xl font-artistic text-headline text-center mb-6">我们的甜蜜日记</h2>
+                <div class="bg-card p-6 rounded-2xl shadow-md mb-8">
+                    <h3 class="font-bold text-lg mb-4 text-headline font-artistic text-3xl">写下今天的故事...</h3>
+                    <textarea id="diary-text" rows="4" class="w-full border-2 border-gray-200 p-3 rounded-lg focus:outline-none focus:border-highlight" placeholder="今天发生了什么有趣的事呢？"></textarea>
                     <input type="file" id="diary-image-upload" class="hidden" accept="image/*" onchange="previewImage(event)">
-                    
                     <div id="image-preview-container" class="hidden mt-4 text-center">
                         <img id="image-preview" src="" alt="图片预览" class="max-h-40 mx-auto rounded-lg">
                         <button onclick="removeImage()" class="mt-2 text-red-500 text-sm">删除图片</button>
                     </div>
-
                     <div class="flex justify-between items-center mt-4">
-                        <button onclick="triggerFileUpload()" title="添加图片" class="bg-sweet-pink text-white w-12 h-12 flex items-center justify-center rounded-full hover:bg-opacity-80 transition transform hover:scale-110">
+                        <button onclick="triggerFileUpload()" title="添加图片" class="bg-button text-white w-12 h-12 flex items-center justify-center rounded-full hover:bg-opacity-90 transition transform hover:scale-110">
                             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z"></path><circle cx="12" cy="13" r="3"></circle></svg>
                         </button>
-                        <button id="publish-btn" onclick="addDiaryEntry()" class="bg-sweet-blue text-white py-3 px-8 rounded-xl font-bold hover:bg-opacity-80 transition-all duration-300 transform hover:scale-105">发布日记</button>
+                        <button id="publish-btn" onclick="addDiaryEntry()" class="bg-button text-button py-3 px-8 rounded-xl font-bold hover:bg-opacity-90 transition-all duration-300 transform hover:scale-105">发布日记</button>
                     </div>
                 </div>
-
-                <div id="month-nav" class="sticky top-4 z-10 text-center mb-6 transition-opacity duration-300 opacity-0">
-                    <!-- Month buttons will be dynamically added here -->
-                </div>
-
+                <div id="month-nav" class="sticky top-4 z-10 text-center mb-6 transition-opacity duration-300 opacity-0"></div>
                 <div id="diary-entries" class="space-y-6"></div>
             </section>
         </div>
     </main>
     
     <!-- 通用消息弹窗 -->
-    <div id="message-modal" class="fixed inset-0 z-50 hidden items-center justify-center modal-bg transition-opacity duration-300">
-        <div class="bg-white p-6 rounded-2xl shadow-2xl text-center w-11/12 max-w-sm">
-            <p id="message-modal-text" class="text-gray-700 mb-6 text-lg"></p>
+    <div id="message-modal" class="fixed inset-0 z-50 hidden items-center justify-center modal-bg">
+        <div class="bg-card p-6 rounded-2xl shadow-2xl text-center w-11/12 max-w-sm">
+            <p id="message-modal-text" class="text-paragraph mb-6 text-lg"></p>
             <div id="message-modal-buttons" class="flex gap-4 justify-center"></div>
         </div>
     </div>
@@ -170,72 +149,56 @@
         const APP_KEY = "XkqnzXsCOCRDoUTyTUNvt9sa";
         const SERVER_URL = "https://ytrfbpzo.lc-cn-n1-shared.com";
 
-        AV.init({
-            appId: APP_ID,
-            appKey: APP_KEY,
-            serverURL: SERVER_URL
-        });
+        AV.init({ appId: APP_ID, appKey: APP_KEY, serverURL: SERVER_URL });
 
-        // --- 全局变量和 DOM 元素 ---
-        let currentUser = null;
-        let selectedFile = null;
-        let confirmCallback = null;
-        let diaryLiveQuery;
-        let settingsLiveQuery;
-        let commentLiveQuery;
+        // --- 全局变量 ---
+        let currentUser = null, selectedFile = null, confirmCallback = null;
+        let diaryLiveQuery, settingsLiveQuery, commentLiveQuery;
 
-        const diaryText = document.getElementById('diary-text');
-        const diaryImageUpload = document.getElementById('diary-image-upload');
-        const diaryEntriesContainer = document.getElementById('diary-entries');
-        const imagePreviewContainer = document.getElementById('image-preview-container');
-        const imagePreview = document.getElementById('image-preview');
-        const publishBtn = document.getElementById('publish-btn');
-        const messageModal = document.getElementById('message-modal');
-        const messageModalText = document.getElementById('message-modal-text');
-        const messageModalButtons = document.getElementById('message-modal-buttons');
-        const monthNavContainer = document.getElementById('month-nav');
+        // --- DOM 元素引用 ---
+        const DOMElements = {
+            diaryText: document.getElementById('diary-text'),
+            diaryImageUpload: document.getElementById('diary-image-upload'),
+            diaryEntriesContainer: document.getElementById('diary-entries'),
+            imagePreviewContainer: document.getElementById('image-preview-container'),
+            imagePreview: document.getElementById('image-preview'),
+            publishBtn: document.getElementById('publish-btn'),
+            messageModal: document.getElementById('message-modal'),
+            messageModalText: document.getElementById('message-modal-text'),
+            messageModalButtons: document.getElementById('message-modal-buttons'),
+            monthNavContainer: document.getElementById('month-nav'),
+        };
         
-        // --- 函数定义区 ---
-
+        // --- 函数定义区 (提前定义所有函数) ---
+        
         function showAlert(message) {
-            messageModalText.textContent = message;
-            messageModalButtons.innerHTML = `<button onclick="hideMessageModal()" class="w-full bg-sweet-pink text-white py-2 px-6 rounded-xl hover:bg-opacity-80 transition-colors">好的</button>`;
-            messageModal.style.display = 'flex';
+            DOMElements.messageModalText.textContent = message;
+            DOMElements.messageModalButtons.innerHTML = `<button onclick="hideMessageModal()" class="w-full bg-button text-button py-2 px-6 rounded-xl hover:bg-opacity-90 transition-colors">好的</button>`;
+            DOMElements.messageModal.style.display = 'flex';
         }
 
-        function hideMessageModal() {
-            messageModal.style.display = 'none';
-        }
+        function hideMessageModal() { DOMElements.messageModal.style.display = 'none'; }
 
         function showConfirm(message, callback) {
             confirmCallback = callback;
-            messageModalText.textContent = message;
-            messageModalButtons.innerHTML = `
-                <button onclick="hideMessageModal()" class="w-1/2 bg-gray-300 text-gray-700 py-2 rounded-xl hover:bg-gray-400 transition-colors">取消</button>
-                <button onclick="executeConfirm()" class="w-1/2 bg-sweet-pink text-white py-2 rounded-xl hover:bg-opacity-80 transition-colors">确认</button>
+            DOMElements.messageModalText.textContent = message;
+            DOMElements.messageModalButtons.innerHTML = `
+                <button onclick="hideMessageModal()" class="w-1/2 bg-gray-200 text-gray-700 py-2 rounded-xl hover:bg-gray-300 transition-colors">取消</button>
+                <button onclick="executeConfirm()" class="w-1/2 bg-button text-button py-2 rounded-xl hover:bg-opacity-90 transition-colors">确认</button>
             `;
-            messageModal.style.display = 'flex';
+            DOMElements.messageModal.style.display = 'flex';
         }
 
         function executeConfirm() {
-            if (confirmCallback) {
-                confirmCallback();
-            }
+            if (confirmCallback) confirmCallback();
             hideMessageModal();
             confirmCallback = null;
         }
         
         function selectUser(user) {
             currentUser = user;
-            const btnHer = document.getElementById('select-her');
-            const btnHim = document.getElementById('select-him');
-            if (user === 'her') {
-                btnHer.classList.add('selected');
-                btnHim.classList.remove('selected');
-            } else {
-                btnHim.classList.add('selected');
-                btnHer.classList.remove('selected');
-            }
+            document.getElementById('select-her').classList.toggle('selected', user === 'her');
+            document.getElementById('select-him').classList.toggle('selected', user === 'him');
         }
 
         function scrollToMonth(month) {
@@ -246,21 +209,19 @@
         }
 
         function renderMonthNav(entries) {
-            if (entries.length < 5) { // 日记少于5篇时不显示导航
-                monthNavContainer.innerHTML = '';
-                monthNavContainer.classList.add('opacity-0');
+            if (entries.length < 5) {
+                DOMElements.monthNavContainer.innerHTML = '';
+                DOMElements.monthNavContainer.classList.add('opacity-0');
                 return;
             }
-
             const months = [...new Set(entries.map(entry => {
                 const date = new Date(entry.createdAt);
                 return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
             }))];
-
-            monthNavContainer.innerHTML = months.map(month => 
-                `<button onclick="scrollToMonth('${month}')" class="px-3 py-1 text-sm text-sweet-brown rounded-full shadow-sm hover:bg-sweet-pink hover:text-white transition-colors mx-1">${month}</button>`
+            DOMElements.monthNavContainer.innerHTML = months.map(month => 
+                `<button onclick="scrollToMonth('${month}')" class="px-3 py-1 text-sm text-paragraph rounded-full shadow-sm hover:bg-secondary hover:text-headline transition-colors mx-1">${month}</button>`
             ).join('');
-            monthNavContainer.classList.remove('opacity-0');
+            DOMElements.monthNavContainer.classList.remove('opacity-0');
         }
         
         async function fetchAndRenderDiaries() {
@@ -269,11 +230,7 @@
              query.include('imageUrl');
              try {
                 const results = await query.find();
-                const entries = results.map(d => ({
-                    id: d.id,
-                    ...d.attributes,
-                    createdAt: d.createdAt
-                }));
+                const entries = results.map(d => ({ id: d.id, ...d.attributes, createdAt: d.createdAt }));
                 renderMonthNav(entries);
                 await renderDiary(entries);
              } catch(error) {
@@ -284,7 +241,6 @@
         async function fetchAndRenderComments(diaryId) {
             const container = document.getElementById(`comments-for-${diaryId}`);
             if (!container) return;
-
             const query = new AV.Query('Comment');
             query.equalTo('diary', AV.Object.createWithoutData('Diary', diaryId));
             query.ascending('createdAt');
@@ -295,13 +251,9 @@
                     const author = comment.get('author');
                     const text = comment.get('text');
                     const isHer = author === 'her';
-                    const authorInfo = isHer 
-                        ? { name: '小一二', icon: '👑'}
-                        : { name: '小布布', icon: '🛡️'};
-                    
+                    const authorInfo = isHer ? { name: '小一二', icon: '👑'} : { name: '小布布', icon: '🛡️'};
                     const date = new Date(comment.get('createdAt'));
                     const timeString = date.toLocaleString('zh-CN', { month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' });
-
                     const commentEl = document.createElement('div');
                     commentEl.className = 'flex items-start gap-2 mt-2 group';
                     commentEl.innerHTML = `
@@ -309,8 +261,8 @@
                         <div class="bg-gray-100 rounded-lg px-3 py-1 text-sm flex-grow">
                             <div class="flex justify-between items-center">
                                 <div>
-                                    <span class="font-bold text-sweet-brown">${authorInfo.name}:</span>
-                                    <span>${text}</span>
+                                    <span class="font-bold text-headline">${authorInfo.name}:</span>
+                                    <span class="text-paragraph">${text}</span>
                                 </div>
                                 <button onclick="deleteComment('${comment.id}')" class="text-gray-300 hover:text-red-500 text-xl font-bold opacity-0 group-hover:opacity-100 transition-opacity">&times;</button>
                             </div>
@@ -319,61 +271,56 @@
                     `;
                     container.appendChild(commentEl);
                 });
-            } catch (error) {
-                console.error(`Failed to fetch comments for ${diaryId}:`, error);
-            }
+            } catch (error) { console.error(`Failed to fetch comments for ${diaryId}:`, error); }
         }
-
+        
         async function addDiaryEntry() {
-            if (!currentUser) {
-                showAlert('要先选择是谁在写日记哦~');
-                return;
-            }
-            const text = diaryText.value.trim();
-            if (!text && !selectedFile) {
-                showAlert('日记内容和图片至少要有一个哦！');
-                return;
-            }
-            publishBtn.disabled = true;
-            publishBtn.textContent = '发布中...';
-            publishBtn.classList.add('btn-disabled');
+            if (!currentUser) return showAlert('要先选择是谁在写日记哦~');
+            const text = DOMElements.diaryText.value.trim();
+            if (!text && !selectedFile) return showAlert('日记内容和图片至少要有一个哦！');
+            
+            DOMElements.publishBtn.disabled = true;
+            DOMElements.publishBtn.textContent = '发布中...';
+            DOMElements.publishBtn.classList.add('btn-disabled');
 
             try {
                 const Diary = AV.Object.extend('Diary');
                 const diary = new Diary();
-                diary.set('text', text);
-                diary.set('author', currentUser);
-
+                
+                let savedImageFile = null;
                 if (selectedFile) {
-                    publishBtn.textContent = '图片上传中...';
+                    DOMElements.publishBtn.textContent = '图片上传中...';
+                    // 先创建并保存文件
                     const imageFile = new AV.File(selectedFile.name, selectedFile);
-                    diary.set('imageUrl', imageFile);
+                    savedImageFile = await imageFile.save();
                 }
                 
-                publishBtn.textContent = '保存日记中...';
+                DOMElements.publishBtn.textContent = '保存日记中...';
+                diary.set('text', text);
+                diary.set('author', currentUser);
+                if (savedImageFile) {
+                    // 使用已保存的文件对象进行关联
+                    diary.set('imageUrl', savedImageFile);
+                }
                 await diary.save();
                 
-                diaryText.value = '';
+                DOMElements.diaryText.value = '';
                 removeImage();
             } catch (error) {
                 console.error("Error adding document: ", error);
                 showAlert(`发布日记失败: ${error.message}`);
             } finally {
-                publishBtn.disabled = false;
-                publishBtn.textContent = '发布日记';
-                publishBtn.classList.remove('btn-disabled');
+                DOMElements.publishBtn.disabled = false;
+                DOMElements.publishBtn.textContent = '发布日记';
+                DOMElements.publishBtn.classList.remove('btn-disabled');
             }
         }
         
         async function addComment(diaryId) {
-            if (!currentUser) {
-                showAlert('要先选择是谁在留言哦~');
-                return;
-            }
+            if (!currentUser) return showAlert('要先选择是谁在留言哦~');
             const inputEl = document.getElementById(`comment-input-${diaryId}`);
             const text = inputEl.value.trim();
             if (!text) return;
-
             try {
                 const Comment = AV.Object.extend('Comment');
                 const comment = new Comment();
@@ -388,36 +335,31 @@
             }
         }
 
-        async function listenForDiaryUpdates() {
-            if (diaryLiveQuery) await diaryLiveQuery.unsubscribe();
-            const query = new AV.Query('Diary');
+        async function listenForUpdates() {
+            const diaryQuery = new AV.Query('Diary');
+            const commentQuery = new AV.Query('Comment');
+            
             try {
-                diaryLiveQuery = await query.subscribe();
+                diaryLiveQuery = await diaryQuery.subscribe();
                 diaryLiveQuery.on('create', fetchAndRenderDiaries);
                 diaryLiveQuery.on('update', fetchAndRenderDiaries);
                 diaryLiveQuery.on('delete', fetchAndRenderDiaries);
-                fetchAndRenderDiaries();
-            } catch(e) { console.error("Failed to subscribe to diaries:", e); }
-        }
-        
-        async function listenForCommentUpdates() {
-            if (commentLiveQuery) await commentLiveQuery.unsubscribe();
-            const query = new AV.Query('Comment');
-            try {
-                commentLiveQuery = await query.subscribe();
+
+                commentLiveQuery = await commentQuery.subscribe();
                 commentLiveQuery.on('create', (comment) => {
                     const diaryPointer = comment.get('diary');
-                    if (diaryPointer) {
-                        fetchAndRenderComments(diaryPointer.id);
-                    }
+                    if (diaryPointer) fetchAndRenderComments(diaryPointer.id);
                 });
                 commentLiveQuery.on('delete', (comment) => {
                     const diaryPointer = comment.get('diary');
-                     if (diaryPointer) {
-                        fetchAndRenderComments(diaryPointer.id);
-                    }
+                     if (diaryPointer) fetchAndRenderComments(diaryPointer.id);
                 });
-            } catch(e) { console.error("Failed to subscribe to comments:", e); }
+            } catch(e) {
+                console.error("LiveQuery Subscription failed:", e);
+            }
+            
+            fetchAndRenderDiaries();
+            listenForDateUpdates();
         }
         
         async function deleteDiaryEntry(id) {
@@ -425,10 +367,7 @@
                 try {
                     const diary = AV.Object.createWithoutData('Diary', id);
                     await diary.destroy();
-                } catch(error) {
-                    console.error("Error deleting document: ", error);
-                    showAlert("删除失败，请稍后再试。");
-                }
+                } catch(error) { showAlert("删除失败，请稍后再试。"); }
             });
         }
         
@@ -437,30 +376,27 @@
                  try {
                     const comment = AV.Object.createWithoutData('Comment', id);
                     await comment.destroy();
-                } catch(error) {
-                    console.error("Error deleting comment: ", error);
-                    showAlert("删除留言失败，请稍后再试。");
-                }
+                } catch(error) { showAlert("删除留言失败，请稍后再试。"); }
             });
         }
 
         async function renderDiary(entries) {
-            diaryEntriesContainer.innerHTML = '';
+            DOMElements.diaryEntriesContainer.innerHTML = '';
             if (entries.length === 0) {
-                 diaryEntriesContainer.innerHTML = `<div class="text-center text-gray-400 py-8 font-chinese">还没有日记呢，快来写下第一篇吧！</div>`;
+                 DOMElements.diaryEntriesContainer.innerHTML = `<div class="text-center text-paragraph py-8 font-artistic text-xl">还没有日记呢，快来写下第一篇吧！</div>`;
                 return;
             }
             for (const entry of entries) {
                 const entryEl = document.createElement('div');
                 const isHer = entry.author === 'her';
                 const authorInfo = isHer
-                    ? { name: '小一二', icon: '👑', borderColor: 'border-sweet-pink' }
-                    : { name: '小布布', icon: '🛡️', borderColor: 'border-sweet-blue' };
+                    ? { name: '小一二', icon: '👑', borderColor: 'border-highlight' }
+                    : { name: '小布布', icon: '🛡️', borderColor: 'border-blue-300' };
                 
                 const date = new Date(entry.createdAt);
                 const monthString = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
                 
-                entryEl.className = `diary-entry bg-warm-white p-5 rounded-2xl shadow-md fade-in border-l-4 ${authorInfo.borderColor}`;
+                entryEl.className = `diary-entry bg-card p-5 rounded-2xl shadow-md fade-in border-l-4 ${authorInfo.borderColor}`;
                 entryEl.setAttribute('data-month', monthString);
                 
                 const timeString = date.toLocaleString('zh-CN', { year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' });
@@ -474,53 +410,51 @@
                         <div>
                              <div class="flex items-center gap-2">
                                 <span class="text-xl">${authorInfo.icon}</span>
-                                <span class="font-bold text-sweet-brown font-chinese text-lg">${authorInfo.name}的日记</span>
+                                <span class="font-bold text-headline font-artistic text-3xl">${authorInfo.name}的日记</span>
                             </div>
                             <p class="text-xs text-gray-400 mt-1 ml-2">${timeString}</p>
                         </div>
                         <button onclick="deleteDiaryEntry('${entry.id}')" class="text-gray-400 hover:text-red-500 text-2xl font-bold">&times;</button>
                     </div>
-                    <p class="text-gray-800 mt-4 whitespace-pre-wrap pl-2 text-lg">${entry.text || ''}</p>
+                    <p class="text-paragraph mt-4 whitespace-pre-wrap pl-2 text-lg">${entry.text || ''}</p>
                     ${imageHtml}
-                    <!-- 评论区 -->
                     <div class="mt-4 pt-4 border-t border-gray-200">
-                        <div id="comments-for-${entry.id}" class="space-y-2">
-                            <!-- 评论会动态加载到这里 -->
-                        </div>
+                        <div id="comments-for-${entry.id}" class="space-y-2"></div>
                         <div class="mt-3 flex items-center gap-2">
                             <input id="comment-input-${entry.id}" type="text" placeholder="说点什么吧..." class="comment-input w-full text-sm rounded-lg px-3 py-1 focus:outline-none">
-                            <button onclick="addComment('${entry.id}')" class="bg-sweet-pink text-white text-sm rounded-lg px-3 py-1 hover:bg-opacity-80 transition">发送</button>
+                            <button onclick="addComment('${entry.id}')" class="bg-button text-button text-sm rounded-lg px-3 py-1 hover:bg-opacity-90 transition">发送</button>
                         </div>
                     </div>
                 `;
-                diaryEntriesContainer.appendChild(entryEl);
+                DOMElements.diaryEntriesContainer.appendChild(entryEl);
                 await fetchAndRenderComments(entry.id);
             }
         }
 
-        function triggerFileUpload() { diaryImageUpload.click(); }
+        function triggerFileUpload() { DOMElements.diaryImageUpload.click(); }
+        
         function previewImage(event) {
-            const file = event.target.files[0];
+             const file = event.target.files[0];
             if (file) {
                 selectedFile = file;
                 const reader = new FileReader();
                 reader.onload = (e) => {
-                    imagePreview.src = e.target.result;
-                    imagePreviewContainer.classList.remove('hidden');
+                    DOMElements.imagePreview.src = e.target.result;
+                    DOMElements.imagePreviewContainer.classList.remove('hidden');
                 };
                 reader.readAsDataURL(file);
             }
         }
+
         function removeImage() {
             selectedFile = null;
-            diaryImageUpload.value = '';
-            imagePreview.src = '';
-            imagePreviewContainer.classList.add('hidden');
+            DOMElements.diaryImageUpload.value = '';
+            DOMElements.imagePreview.src = '';
+            DOMElements.imagePreviewContainer.classList.add('hidden');
         }
-
-        let loveStartDate;
-        let timerInterval;
-
+        
+        let loveStartDate, timerInterval;
+        
         function updateTimerUI(dateISO) {
              loveStartDate = dateISO ? new Date(dateISO) : new Date('2023-01-01T00:00:00');
              if (timerInterval) clearInterval(timerInterval);
@@ -544,22 +478,10 @@
             try {
                 const setting = await query.first();
                 updateTimerUI(setting ? setting.get('startDate') : null);
-            } catch(error) {
-                console.error("Initial date fetch failed:", error);
-                updateTimerUI(null);
-            }
-
-            try {
                 settingsLiveQuery = await query.subscribe();
-                settingsLiveQuery.on('update', (setting) => {
-                    updateTimerUI(setting.get('startDate'));
-                });
-                 settingsLiveQuery.on('create', (setting) => {
-                    updateTimerUI(setting.get('startDate'));
-                });
-            } catch(e) {
-                 console.error("Failed to subscribe to settings:", e);
-            }
+                settingsLiveQuery.on('update', (setting) => updateTimerUI(setting.get('startDate')));
+                settingsLiveQuery.on('create', (setting) => updateTimerUI(setting.get('startDate')));
+            } catch(e) { console.error("Failed to subscribe to settings:", e); }
         }
 
         async function setLoveStartDate() {
@@ -576,30 +498,19 @@
                     setting.set('startDate', newStartDate.toISOString());
                     await setting.save();
                     toggleSetDate();
-                } catch (error) {
-                    console.error("Error saving start date: ", error);
-                    showAlert("保存纪念日失败，请稍后再试。");
-                }
+                } catch (error) { showAlert("保存纪念日失败，请稍后再试。"); }
             }
         }
         
-        function toggleSetDate() { 
-            document.getElementById('date-setter').classList.toggle('hidden'); 
-        }
-
-        // --- 应用初始化 ---
-        function initApp() {
-            listenForDiaryUpdates();
-            listenForDateUpdates();
-            listenForCommentUpdates();
+        function toggleSetDate() { document.getElementById('date-setter').classList.toggle('hidden'); }
+        
+        async function initApp() {
+            listenForUpdates();
         }
 
         async function connectToCloud() {
             try {
-                const user = AV.User.current();
-                if (!user) {
-                    await AV.User.loginAnonymously();
-                }
+                if (!AV.User.current()) await AV.User.loginAnonymously();
                 initApp();
             } catch (error) {
                 console.error("LeanCloud connection failed:", error);
@@ -607,22 +518,16 @@
             }
         }
         
+        // --- 启动应用 ---
         connectToCloud();
 
-        // 将需要从 HTML 调用的函数暴露到全局
-        window.selectUser = selectUser;
-        window.toggleSetDate = toggleSetDate;
-        window.setLoveStartDate = setLoveStartDate;
-        window.triggerFileUpload = triggerFileUpload;
-        window.previewImage = previewImage;
-        window.removeImage = removeImage;
-        window.addDiaryEntry = addDiaryEntry;
-        window.deleteDiaryEntry = deleteDiaryEntry;
-        window.addComment = addComment;
-        window.deleteComment = deleteComment;
-        window.hideMessageModal = hideMessageModal;
-        window.executeConfirm = executeConfirm;
-        window.scrollToMonth = scrollToMonth;
+        // --- 将函数暴露到全局 ---
+        Object.assign(window, {
+            selectUser, toggleSetDate, setLoveStartDate, triggerFileUpload,
+            previewImage, removeImage, addDiaryEntry, deleteDiaryEntry,
+            addComment, deleteComment, hideMessageModal, executeConfirm, scrollToMonth,
+            fetchAndRenderComments
+        });
     });
     </script>
 </body>
