@@ -11,35 +11,26 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Gaegu:wght@400;700&family=ZCOOL+KuaiLe&display=swap" rel="stylesheet">
     <style>
+        html {
+            scroll-behavior: smooth;
+        }
         body {
             font-family: 'Gaegu', cursive;
-            /* * ===============================================================
-             * == 请在这里替换你的图片路径！ ==
-             * ===============================================================
-             * 1. 把你的图片上传到 GitHub 仓库的 main/pic/ 文件夹
-             * 2. 把下面的 '你的图片文件名.jpg' 换成你上传的真实文件名
-             * ===============================================================
-             */
-            background-image: url('main/pic/微信图片_20250903173304_66_272.jpg'); 
-            background-size: cover;
-            background-position: center;
-            background-attachment: fixed; /* 背景固定，滚动时不移动 */
+            background: linear-gradient(170deg, #ffdde1 0%, #ffc4c8 100%);
             -webkit-tap-highlight-color: transparent;
         }
         .font-chinese { font-family: 'ZCOOL KuaiLe', cursive; }
         .bg-sweet-pink { background-color: #ffafcc; }
         .bg-sweet-blue { background-color: #a2d2ff; }
         .bg-sweet-yellow { background-color: #fff1a8; }
-        .bg-sweet-green { background-color: #cdffcd; }
         .text-sweet-brown { color: #7c5c53; }
         .border-sweet-pink { border-color: #ffafcc; }
         .border-sweet-blue { border-color: #a2d2ff; }
         .bg-warm-white { background-color: #FFFCF9; }
         .bg-glass-effect {
-            /* 增加了不透明度，让内容更清晰 */
-            background-color: rgba(255, 255, 255, 0.85);
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
+            background-color: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
             border: 1px solid rgba(255, 255, 255, 0.2);
             box-shadow: 0 8px 32px 0 rgba(236, 72, 153, 0.15);
         }
@@ -61,6 +52,24 @@
             color: #7c5c53;
             transform: scale(1.05);
             box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        }
+        
+        .comment-input {
+            border: 2px solid #ffdde1;
+            font-family: 'Gaegu', cursive;
+            transition: all 0.3s;
+        }
+        .comment-input:focus {
+            border-color: #ffafcc;
+            box-shadow: 0 0 0 3px rgba(255, 175, 204, 0.4);
+        }
+        .comment-input::placeholder {
+            color: #b2a19b;
+        }
+        #month-nav button {
+            background-color: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(5px);
+            -webkit-backdrop-filter: blur(5px);
         }
     </style>
 </head>
@@ -91,7 +100,6 @@
             <!-- 恋爱计时器 -->
             <section id="love-timer" class="bg-sweet-yellow p-6 rounded-2xl shadow-md text-center">
                  <h2 class="text-xl font-bold text-sweet-brown mb-4 font-chinese flex items-center justify-center gap-2">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-sweet-brown"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
                     我们已经相爱了
                 </h2>
                 <div id="timer-display" class="flex justify-center items-center space-x-2 md:space-x-4 text-sweet-brown">
@@ -116,7 +124,6 @@
             <!-- 恋爱日记 -->
             <section id="love-diary">
                 <h2 class="text-2xl font-bold text-sweet-brown text-center mb-6 font-chinese flex items-center justify-center gap-2">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-sweet-brown"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"></path><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"></path></svg>
                     我们的甜蜜日记
                 </h2>
                 
@@ -133,10 +140,14 @@
 
                     <div class="flex justify-between items-center mt-4">
                         <button onclick="triggerFileUpload()" title="添加图片" class="bg-sweet-pink text-white w-12 h-12 flex items-center justify-center rounded-full hover:bg-opacity-80 transition transform hover:scale-110">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z"></path><circle cx="12" cy="13" r="3"></circle></svg>
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z"></path><circle cx="12" cy="13" r="3"></circle></svg>
                         </button>
                         <button id="publish-btn" onclick="addDiaryEntry()" class="bg-sweet-blue text-white py-3 px-8 rounded-xl font-bold hover:bg-opacity-80 transition-all duration-300 transform hover:scale-105">发布日记</button>
                     </div>
+                </div>
+
+                <div id="month-nav" class="sticky top-4 z-10 text-center mb-6 transition-opacity duration-300 opacity-0">
+                    <!-- Month buttons will be dynamically added here -->
                 </div>
 
                 <div id="diary-entries" class="space-y-6"></div>
@@ -171,8 +182,8 @@
         let confirmCallback = null;
         let diaryLiveQuery;
         let settingsLiveQuery;
+        let commentLiveQuery;
 
-        const mainContent = document.getElementById('main-content');
         const diaryText = document.getElementById('diary-text');
         const diaryImageUpload = document.getElementById('diary-image-upload');
         const diaryEntriesContainer = document.getElementById('diary-entries');
@@ -182,26 +193,38 @@
         const messageModal = document.getElementById('message-modal');
         const messageModalText = document.getElementById('message-modal-text');
         const messageModalButtons = document.getElementById('message-modal-buttons');
+        const monthNavContainer = document.getElementById('month-nav');
         
-        // --- 认证与初始化 ---
-        async function connectToCloud() {
-            try {
-                const user = AV.User.current();
-                if (!user) {
-                    await AV.User.loginAnonymously();
-                    console.log("Authenticated with LeanCloud anonymously.");
-                } else {
-                    console.log("Already authenticated with LeanCloud.");
-                }
-                initApp(); // 连接成功后初始化应用
-            } catch (error) {
-                console.error("LeanCloud connection failed:", error);
-                showAlert("无法建立安全的云端连接，请检查网络并刷新页面。");
+        // --- 函数定义区 ---
+
+        function showAlert(message) {
+            messageModalText.textContent = message;
+            messageModalButtons.innerHTML = `<button onclick="hideMessageModal()" class="w-full bg-sweet-pink text-white py-2 px-6 rounded-xl hover:bg-opacity-80 transition-colors">好的</button>`;
+            messageModal.style.display = 'flex';
+        }
+
+        function hideMessageModal() {
+            messageModal.style.display = 'none';
+        }
+
+        function showConfirm(message, callback) {
+            confirmCallback = callback;
+            messageModalText.textContent = message;
+            messageModalButtons.innerHTML = `
+                <button onclick="hideMessageModal()" class="w-1/2 bg-gray-300 text-gray-700 py-2 rounded-xl hover:bg-gray-400 transition-colors">取消</button>
+                <button onclick="executeConfirm()" class="w-1/2 bg-sweet-pink text-white py-2 rounded-xl hover:bg-opacity-80 transition-colors">确认</button>
+            `;
+            messageModal.style.display = 'flex';
+        }
+
+        function executeConfirm() {
+            if (confirmCallback) {
+                confirmCallback();
             }
+            hideMessageModal();
+            confirmCallback = null;
         }
         
-        connectToCloud();
-
         function selectUser(user) {
             currentUser = user;
             const btnHer = document.getElementById('select-her');
@@ -215,15 +238,34 @@
             }
         }
 
-        function initApp() {
-            listenForDiaryUpdates();
-            listenForDateUpdates();
+        function scrollToMonth(month) {
+            const firstEntryOfMonth = document.querySelector(`.diary-entry[data-month="${month}"]`);
+            if (firstEntryOfMonth) {
+                firstEntryOfMonth.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
+        }
+
+        function renderMonthNav(entries) {
+            if (entries.length < 5) { // 日记少于5篇时不显示导航
+                monthNavContainer.innerHTML = '';
+                monthNavContainer.classList.add('opacity-0');
+                return;
+            }
+
+            const months = [...new Set(entries.map(entry => {
+                const date = new Date(entry.createdAt);
+                return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
+            }))];
+
+            monthNavContainer.innerHTML = months.map(month => 
+                `<button onclick="scrollToMonth('${month}')" class="px-3 py-1 text-sm text-sweet-brown rounded-full shadow-sm hover:bg-sweet-pink hover:text-white transition-colors mx-1">${month}</button>`
+            ).join('');
+            monthNavContainer.classList.remove('opacity-0');
         }
         
         async function fetchAndRenderDiaries() {
              const query = new AV.Query('Diary');
              query.descending('createdAt');
-             // 让查询结果同时包含 imageUrl 指向的文件对象的 URL
              query.include('imageUrl');
              try {
                 const results = await query.find();
@@ -232,10 +274,54 @@
                     ...d.attributes,
                     createdAt: d.createdAt
                 }));
-                renderDiary(entries);
+                renderMonthNav(entries);
+                await renderDiary(entries);
              } catch(error) {
                  console.error("Failed to fetch diaries:", error);
              }
+        }
+        
+        async function fetchAndRenderComments(diaryId) {
+            const container = document.getElementById(`comments-for-${diaryId}`);
+            if (!container) return;
+
+            const query = new AV.Query('Comment');
+            query.equalTo('diary', AV.Object.createWithoutData('Diary', diaryId));
+            query.ascending('createdAt');
+            try {
+                const comments = await query.find();
+                container.innerHTML = '';
+                comments.forEach(comment => {
+                    const author = comment.get('author');
+                    const text = comment.get('text');
+                    const isHer = author === 'her';
+                    const authorInfo = isHer 
+                        ? { name: '小一二', icon: '👑'}
+                        : { name: '小布布', icon: '🛡️'};
+                    
+                    const date = new Date(comment.get('createdAt'));
+                    const timeString = date.toLocaleString('zh-CN', { month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+
+                    const commentEl = document.createElement('div');
+                    commentEl.className = 'flex items-start gap-2 mt-2 group';
+                    commentEl.innerHTML = `
+                        <span class="text-lg">${authorInfo.icon}</span>
+                        <div class="bg-gray-100 rounded-lg px-3 py-1 text-sm flex-grow">
+                            <div class="flex justify-between items-center">
+                                <div>
+                                    <span class="font-bold text-sweet-brown">${authorInfo.name}:</span>
+                                    <span>${text}</span>
+                                </div>
+                                <button onclick="deleteComment('${comment.id}')" class="text-gray-300 hover:text-red-500 text-xl font-bold opacity-0 group-hover:opacity-100 transition-opacity">&times;</button>
+                            </div>
+                            <p class="text-xs text-gray-400 mt-1">${timeString}</p>
+                        </div>
+                    `;
+                    container.appendChild(commentEl);
+                });
+            } catch (error) {
+                console.error(`Failed to fetch comments for ${diaryId}:`, error);
+            }
         }
 
         async function addDiaryEntry() {
@@ -253,26 +339,20 @@
             publishBtn.classList.add('btn-disabled');
 
             try {
-                let savedImageFile = null;
-                if (selectedFile) {
-                    publishBtn.textContent = '图片上传中...';
-                    // 先创建并保存文件
-                    const imageFile = new AV.File(selectedFile.name, selectedFile);
-                    savedImageFile = await imageFile.save();
-                }
-                
-                publishBtn.textContent = '保存日记中...';
                 const Diary = AV.Object.extend('Diary');
                 const diary = new Diary();
                 diary.set('text', text);
-                
-                if (savedImageFile) {
-                    // 使用已保存的文件对象进行关联
-                    diary.set('imageUrl', savedImageFile);
-                }
-
                 diary.set('author', currentUser);
+
+                if (selectedFile) {
+                    publishBtn.textContent = '图片上传中...';
+                    const imageFile = new AV.File(selectedFile.name, selectedFile);
+                    diary.set('imageUrl', imageFile);
+                }
+                
+                publishBtn.textContent = '保存日记中...';
                 await diary.save();
+                
                 diaryText.value = '';
                 removeImage();
             } catch (error) {
@@ -284,25 +364,63 @@
                 publishBtn.classList.remove('btn-disabled');
             }
         }
+        
+        async function addComment(diaryId) {
+            if (!currentUser) {
+                showAlert('要先选择是谁在留言哦~');
+                return;
+            }
+            const inputEl = document.getElementById(`comment-input-${diaryId}`);
+            const text = inputEl.value.trim();
+            if (!text) return;
+
+            try {
+                const Comment = AV.Object.extend('Comment');
+                const comment = new Comment();
+                comment.set('text', text);
+                comment.set('author', currentUser);
+                comment.set('diary', AV.Object.createWithoutData('Diary', diaryId));
+                await comment.save();
+                inputEl.value = '';
+            } catch (error) {
+                console.error('Error adding comment:', error);
+                showAlert('留言失败了，请稍后再试~');
+            }
+        }
 
         async function listenForDiaryUpdates() {
             if (diaryLiveQuery) await diaryLiveQuery.unsubscribe();
             const query = new AV.Query('Diary');
             try {
                 diaryLiveQuery = await query.subscribe();
-            } catch(e) {
-                console.error("Failed to subscribe to diaries:", e);
-                return;
-            }
-            
-            diaryLiveQuery.on('create', fetchAndRenderDiaries);
-            diaryLiveQuery.on('update', fetchAndRenderDiaries);
-            diaryLiveQuery.on('delete', fetchAndRenderDiaries);
-            
-            fetchAndRenderDiaries();
+                diaryLiveQuery.on('create', fetchAndRenderDiaries);
+                diaryLiveQuery.on('update', fetchAndRenderDiaries);
+                diaryLiveQuery.on('delete', fetchAndRenderDiaries);
+                fetchAndRenderDiaries();
+            } catch(e) { console.error("Failed to subscribe to diaries:", e); }
         }
         
-        function deleteDiaryEntry(id) {
+        async function listenForCommentUpdates() {
+            if (commentLiveQuery) await commentLiveQuery.unsubscribe();
+            const query = new AV.Query('Comment');
+            try {
+                commentLiveQuery = await query.subscribe();
+                commentLiveQuery.on('create', (comment) => {
+                    const diaryPointer = comment.get('diary');
+                    if (diaryPointer) {
+                        fetchAndRenderComments(diaryPointer.id);
+                    }
+                });
+                commentLiveQuery.on('delete', (comment) => {
+                    const diaryPointer = comment.get('diary');
+                     if (diaryPointer) {
+                        fetchAndRenderComments(diaryPointer.id);
+                    }
+                });
+            } catch(e) { console.error("Failed to subscribe to comments:", e); }
+        }
+        
+        async function deleteDiaryEntry(id) {
             showConfirm('真的要删除这篇日记吗？这会从云端永久删除哦！', async () => {
                 try {
                     const diary = AV.Object.createWithoutData('Diary', id);
@@ -313,28 +431,42 @@
                 }
             });
         }
+        
+        async function deleteComment(id) {
+            showConfirm('确定要删除这条留言吗？', async () => {
+                 try {
+                    const comment = AV.Object.createWithoutData('Comment', id);
+                    await comment.destroy();
+                } catch(error) {
+                    console.error("Error deleting comment: ", error);
+                    showAlert("删除留言失败，请稍后再试。");
+                }
+            });
+        }
 
-        function renderDiary(entries) {
+        async function renderDiary(entries) {
             diaryEntriesContainer.innerHTML = '';
             if (entries.length === 0) {
-                diaryEntriesContainer.innerHTML = `<div class="text-center text-gray-400 py-8 font-chinese">还没有日记呢，快来写下第一篇吧！</div>`;
+                 diaryEntriesContainer.innerHTML = `<div class="text-center text-gray-400 py-8 font-chinese">还没有日记呢，快来写下第一篇吧！</div>`;
                 return;
             }
-            entries.forEach(entry => {
+            for (const entry of entries) {
                 const entryEl = document.createElement('div');
                 const isHer = entry.author === 'her';
                 const authorInfo = isHer
                     ? { name: '小一二', icon: '👑', borderColor: 'border-sweet-pink' }
                     : { name: '小布布', icon: '🛡️', borderColor: 'border-sweet-blue' };
-
-                entryEl.className = `bg-warm-white p-5 rounded-2xl shadow-md fade-in border-l-4 ${authorInfo.borderColor}`;
                 
                 const date = new Date(entry.createdAt);
+                const monthString = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
+                
+                entryEl.className = `diary-entry bg-warm-white p-5 rounded-2xl shadow-md fade-in border-l-4 ${authorInfo.borderColor}`;
+                entryEl.setAttribute('data-month', monthString);
+                
                 const timeString = date.toLocaleString('zh-CN', { year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' });
                 
-                // LeanCloud 返回的是一个包含 URL 的对象
                 const imageObject = entry.imageUrl;
-                const imageUrl = imageObject ? imageObject.url : null;
+                const imageUrl = imageObject ? imageObject.get('url') : null;
                 const imageHtml = imageUrl ? `<img src="${imageUrl}" alt="日记图片" class="mt-4 rounded-lg w-full diary-image">` : '';
 
                 entryEl.innerHTML = `
@@ -350,9 +482,20 @@
                     </div>
                     <p class="text-gray-800 mt-4 whitespace-pre-wrap pl-2 text-lg">${entry.text || ''}</p>
                     ${imageHtml}
+                    <!-- 评论区 -->
+                    <div class="mt-4 pt-4 border-t border-gray-200">
+                        <div id="comments-for-${entry.id}" class="space-y-2">
+                            <!-- 评论会动态加载到这里 -->
+                        </div>
+                        <div class="mt-3 flex items-center gap-2">
+                            <input id="comment-input-${entry.id}" type="text" placeholder="说点什么吧..." class="comment-input w-full text-sm rounded-lg px-3 py-1 focus:outline-none">
+                            <button onclick="addComment('${entry.id}')" class="bg-sweet-pink text-white text-sm rounded-lg px-3 py-1 hover:bg-opacity-80 transition">发送</button>
+                        </div>
+                    </div>
                 `;
                 diaryEntriesContainer.appendChild(entryEl);
-            });
+                await fetchAndRenderComments(entry.id);
+            }
         }
 
         function triggerFileUpload() { diaryImageUpload.click(); }
@@ -408,16 +551,15 @@
 
             try {
                 settingsLiveQuery = await query.subscribe();
+                settingsLiveQuery.on('update', (setting) => {
+                    updateTimerUI(setting.get('startDate'));
+                });
+                 settingsLiveQuery.on('create', (setting) => {
+                    updateTimerUI(setting.get('startDate'));
+                });
             } catch(e) {
                  console.error("Failed to subscribe to settings:", e);
-                 return;
             }
-            settingsLiveQuery.on('update', (setting) => {
-                updateTimerUI(setting.get('startDate'));
-            });
-             settingsLiveQuery.on('create', (setting) => {
-                updateTimerUI(setting.get('startDate'));
-            });
         }
 
         async function setLoveStartDate() {
@@ -445,34 +587,29 @@
             document.getElementById('date-setter').classList.toggle('hidden'); 
         }
 
-        function showAlert(message) {
-            messageModalText.textContent = message;
-            messageModalButtons.innerHTML = `<button onclick="hideMessageModal()" class="w-full bg-sweet-pink text-white py-2 px-6 rounded-xl hover:bg-opacity-80 transition-colors">好的</button>`;
-            messageModal.style.display = 'flex';
+        // --- 应用初始化 ---
+        function initApp() {
+            listenForDiaryUpdates();
+            listenForDateUpdates();
+            listenForCommentUpdates();
         }
 
-        function hideMessageModal() {
-            messageModal.style.display = 'none';
-        }
-
-        function showConfirm(message, callback) {
-            confirmCallback = callback;
-            messageModalText.textContent = message;
-            messageModalButtons.innerHTML = `
-                <button onclick="hideMessageModal()" class="w-1-2 bg-gray-300 text-gray-700 py-2 rounded-xl hover:bg-gray-400 transition-colors">取消</button>
-                <button onclick="executeConfirm()" class="w-1-2 bg-sweet-pink text-white py-2 rounded-xl hover:bg-opacity-80 transition-colors">确认</button>
-            `;
-            messageModal.style.display = 'flex';
-        }
-
-        function executeConfirm() {
-            if (confirmCallback) {
-                confirmCallback();
+        async function connectToCloud() {
+            try {
+                const user = AV.User.current();
+                if (!user) {
+                    await AV.User.loginAnonymously();
+                }
+                initApp();
+            } catch (error) {
+                console.error("LeanCloud connection failed:", error);
+                showAlert("无法建立安全的云端连接，请检查网络并刷新页面。");
             }
-            hideMessageModal();
-            confirmCallback = null;
         }
+        
+        connectToCloud();
 
+        // 将需要从 HTML 调用的函数暴露到全局
         window.selectUser = selectUser;
         window.toggleSetDate = toggleSetDate;
         window.setLoveStartDate = setLoveStartDate;
@@ -481,8 +618,11 @@
         window.removeImage = removeImage;
         window.addDiaryEntry = addDiaryEntry;
         window.deleteDiaryEntry = deleteDiaryEntry;
+        window.addComment = addComment;
+        window.deleteComment = deleteComment;
         window.hideMessageModal = hideMessageModal;
         window.executeConfirm = executeConfirm;
+        window.scrollToMonth = scrollToMonth;
     });
     </script>
 </body>
