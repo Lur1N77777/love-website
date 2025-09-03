@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>我们的恋爱小屋</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://img.cloud.tencent.com/qcloud/cloudbase/1.10.0/cloudbase.full.js"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700&family=Lxgw+WenKai+Lite:wght@400;700&display=swap" rel="stylesheet">
@@ -30,11 +31,7 @@
         @keyframes fadeIn { from { opacity: 0; transform: translateY(-20px); } to { opacity: 1; transform: translateY(0); } }
         .modal-bg { background-color: rgba(0, 0, 0, 0.5); }
         .diary-image { max-height: 300px; object-fit: cover; }
-        /* 按钮禁用时的样式 */
-        .btn-disabled {
-            cursor: not-allowed;
-            background-color: #d1d5db; /* gray-300 */
-        }
+        .btn-disabled { cursor: not-allowed; background-color: #d1d5db; }
     </style>
 </head>
 <body class="flex items-center justify-center min-h-screen">
@@ -51,11 +48,11 @@
         </div>
     </div>
     
-    <!-- 密码输入弹窗 (默认隐藏) -->
+    <!-- 密码输入弹窗 -->
     <div id="password-prompt" class="fixed inset-0 z-50 hidden items-center justify-center modal-bg transition-opacity duration-300">
         <div class="bg-white p-8 rounded-2xl shadow-2xl text-center w-11/11 max-w-sm">
             <h2 id="password-title" class="text-2xl font-bold text-macaron-brown font-chinese mb-4"></h2>
-            <p class="text-gray-500 mb-6">请输入你的生日作为密码 (格式: MMDD, 如0101)</p>
+            <p class="text-gray-500 mb-6">请输入你的生日作为密码 (格式: MMDD)</p>
             <input type="password" id="password-input" class="w-full border-2 border-gray-200 p-3 rounded-lg text-center text-lg focus:outline-none focus:border-macaron-pink" placeholder="MMDD">
             <p id="error-message" class="text-red-500 mt-2 h-4"></p>
             <div class="flex gap-4 mt-4">
@@ -65,8 +62,7 @@
         </div>
     </div>
 
-
-    <!-- 主内容区 (默认隐藏) -->
+    <!-- 主内容区 -->
     <main id="main-content" class="hidden w-full max-w-4xl mx-auto p-4 md:p-8">
         <div class="bg-soft-pink-glass backdrop-blur-sm rounded-3xl shadow-lg p-6 md:p-10 space-y-8 fade-in">
             <!-- 头部 -->
@@ -75,7 +71,7 @@
                 <p class="text-gray-500 mt-2">记录我们在一起的每分每秒</p>
             </header>
 
-            <!-- 恋爱计时器 (云端同步) -->
+            <!-- 恋爱计时器 -->
             <section id="love-timer" class="bg-macaron-yellow p-6 rounded-2xl shadow-md text-center">
                  <h2 class="text-xl font-bold text-macaron-brown mb-4 font-chinese flex items-center justify-center gap-2">
                     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-macaron-brown"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
@@ -126,48 +122,31 @@
                     </div>
                 </div>
 
-                <div id="diary-entries" class="space-y-6">
-                    <!-- 日记条目会动态添加到这里 -->
-                </div>
+                <div id="diary-entries" class="space-y-6"></div>
             </section>
         </div>
     </main>
 
-    <!-- Firebase 和 ImgBB 集成 -->
-    <script type="module">
-        // 引入 Firebase 服务
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-        import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-        import { getFirestore, collection, addDoc, onSnapshot, query, orderBy, serverTimestamp, doc, deleteDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
-
-        // ===================================================================================
-        // ======================== 🔥 你的专属配置已填充完毕 🔥 ========================
-        // ===================================================================================
-
-        const firebaseConfig = {
-            apiKey: "AIzaSyDkRSccHy4XPTmTzZ4E4jx0xXQXjlsVFrk",
-            authDomain: "love-website-34385.firebaseapp.com",
-            projectId: "love-website-34385",
-            storageBucket: "love-website-34385.firebasestorage.app",
-            messagingSenderId: "109172560935",
-            appId: "1:109172560935:web:e7fc9a5431e9e2d4f9ea02",
-            measurementId: "G-ZWZGWYNSDK"
-        };
-        
-        const imgbbApiKey = '52d9ae954fb6ac2768c4f8384cc51c36';
-
-        // ===================================================================================
-        // ===================================================================================
-
-        // 初始化 Firebase
-        const app = initializeApp(firebaseConfig);
-        const db = getFirestore(app);
-        const auth = getAuth(app);
+    <script>
+        // --- 腾讯云开发 TCB 集成 ---
+        const app = cloudbase.init({
+            // ===================================================================================
+            // =================== ⚠️ 请将这里替换成你的腾讯云环境ID ⚠️ ===================
+            // ===================================================================================
+            env: 'cloud1-4g2ivcfs013f7345' 
+            // ===================================================================================
+            // ===================================================================================
+        });
+        const auth = app.auth();
+        const db = app.database();
+        const _ = db.command;
 
         // --- 全局变量和 DOM 元素 ---
         const passwords = { her: '1205', him: '0805' };
         let currentUser = null;
         let selectedFile = null;
+        let diaryListener = null;
+        let dateListener = null;
 
         const loginModal = document.getElementById('login-modal');
         const passwordPrompt = document.getElementById('password-prompt');
@@ -179,32 +158,24 @@
         const imagePreview = document.getElementById('image-preview');
         const publishBtn = document.getElementById('publish-btn');
         
-        // --- 将函数暴露到全局作用域，以便 HTML onclick 可以调用 ---
-        window.showPasswordPrompt = showPasswordPrompt;
-        window.hidePasswordPrompt = hidePasswordPrompt;
-        window.checkPassword = checkPassword;
-        window.toggleSetDate = toggleSetDate;
-        window.setLoveStartDate = setLoveStartDate;
-        window.triggerFileUpload = triggerFileUpload;
-        window.previewImage = previewImage;
-        window.removeImage = removeImage;
-        window.addDiaryEntry = addDiaryEntry;
-        window.deleteDiaryEntry = deleteDiaryEntry;
-
         // --- 登录与认证 ---
-        // 页面加载时，自动进行匿名登录以建立稳定连接
-        signInAnonymously(auth).catch((error) => {
-            console.error("Anonymous sign-in failed:", error);
-            alert("无法建立安全的云端连接，请检查网络并刷新页面。");
-        });
-
-        // 监听认证状态
-        onAuthStateChanged(auth, (user) => {
-            if (user) {
-                console.log("Authenticated anonymously with UID:", user.uid);
-                // 认证成功，但UI仍由密码控制
+        async function connectToCloud() {
+            try {
+                // 检查登录状态，如果未登录则进行匿名登录
+                const loginState = await auth.getLoginState();
+                if (!loginState) {
+                    await auth.anonymousAuthProvider().signIn();
+                    console.log("Authenticated with TCB anonymously.");
+                } else {
+                    console.log("Already authenticated with TCB.");
+                }
+            } catch (error) {
+                console.error("TCB anonymous sign-in failed:", error);
+                alert("无法建立安全的云端连接，请检查网络并刷新页面。");
             }
-        });
+        }
+        
+        window.onload = connectToCloud;
 
         function showPasswordPrompt(user) {
             currentUser = user;
@@ -223,7 +194,7 @@
                 loginModal.style.display = 'none';
                 passwordPrompt.style.display = 'none';
                 mainContent.style.display = 'block';
-                initApp(); // 认证成功后初始化应用
+                initApp();
             } else {
                 errorMessage.textContent = '密码不对哦，再想想~';
                 setTimeout(() => { errorMessage.textContent = ''; }, 2000);
@@ -232,35 +203,28 @@
 
         // --- 初始化应用 ---
         function initApp() {
-            listenForDateUpdates(); // 替换本地加载
+            listenForDateUpdates();
             listenForDiaryUpdates();
         }
 
-        // --- 图片上传到 ImgBB ---
-        async function uploadImageToImgBB(file) {
-            const formData = new FormData();
-            formData.append('image', file);
-            
+        // --- 图片上传到 TCB 云存储 ---
+        async function uploadImageToTCB(file) {
             try {
-                const response = await fetch(`https://api.imgbb.com/1/upload?key=${imgbbApiKey}`, {
-                    method: 'POST',
-                    body: formData,
+                const result = await app.uploadFile({
+                    cloudPath: `diary-images/${Date.now()}-${file.name}`,
+                    filePath: file
                 });
-                const result = await response.json();
-                if (result.success) {
-                    return result.data.url;
-                } else {
-                    console.error('ImgBB upload failed:', result);
-                    throw new Error('图片上传失败');
-                }
+                // 获取临时链接用于显示
+                const fileListRes = await app.getTempFileURL({ fileList: [result.fileID] });
+                return fileListRes.fileList[0].tempFileURL;
             } catch (error) {
-                console.error('Error uploading image:', error);
+                console.error('TCB upload failed:', error);
                 alert('图片上传时发生错误，请稍后再试。');
                 return null;
             }
         }
 
-        // --- 日记 Firestore 逻辑 ---
+        // --- 日记数据库逻辑 ---
         async function addDiaryEntry() {
             const text = diaryText.value.trim();
             if (!text && !selectedFile) {
@@ -273,7 +237,7 @@
 
             let imageUrl = null;
             if (selectedFile) {
-                imageUrl = await uploadImageToImgBB(selectedFile);
+                imageUrl = await uploadImageToTCB(selectedFile);
                 if (!imageUrl) {
                     publishBtn.disabled = false;
                     publishBtn.textContent = '发布日记';
@@ -282,11 +246,13 @@
                 }
             }
             try {
-                await addDoc(collection(db, "diaries"), {
-                    text: text,
-                    imageUrl: imageUrl,
-                    author: currentUser,
-                    timestamp: serverTimestamp()
+                await db.collection('diaries').add({
+                    data: {
+                        text: text,
+                        imageUrl: imageUrl,
+                        author: currentUser,
+                        timestamp: db.serverDate()
+                    }
                 });
                 diaryText.value = '';
                 removeImage();
@@ -301,20 +267,22 @@
         }
 
         function listenForDiaryUpdates() {
-            const q = query(collection(db, "diaries"), orderBy("timestamp", "desc"));
-            onSnapshot(q, (querySnapshot) => {
-                const entries = [];
-                querySnapshot.forEach((doc) => {
-                    entries.push({ id: doc.id, ...doc.data() });
-                });
-                renderDiary(entries);
+            if(diaryListener) diaryListener.close(); // 防止重复监听
+            diaryListener = db.collection('diaries').orderBy('timestamp', 'desc').watch({
+                onChange: (snapshot) => {
+                    const entries = snapshot.docs.map(doc => ({ id: doc._id, ...doc }));
+                    renderDiary(entries);
+                },
+                onError: (error) => {
+                    console.error('Diary listener error:', error);
+                }
             });
         }
         
         async function deleteDiaryEntry(id) {
-             if(confirm('真的要删除这篇日记吗？这会从云端永久删除哦！')) {
+            if(confirm('真的要删除这篇日记吗？这会从云端永久删除哦！')) {
                 try {
-                    await deleteDoc(doc(db, "diaries", id));
+                    await db.collection('diaries').doc(id).remove();
                 } catch(error) {
                     console.error("Error deleting document: ", error);
                     alert("删除失败，请稍后再试。");
@@ -337,7 +305,7 @@
 
                 entryEl.className = `bg-warm-white p-5 rounded-2xl shadow-md fade-in border-l-4 ${authorInfo.borderColor}`;
                 
-                const date = entry.timestamp ? entry.timestamp.toDate() : new Date();
+                const date = entry.timestamp ? new Date(entry.timestamp) : new Date();
                 const timeString = date.toLocaleString('zh-CN', { year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' });
                 const imageHtml = entry.imageUrl ? `<img src="${entry.imageUrl}" alt="日记图片" class="mt-4 rounded-lg w-full diary-image">` : '';
 
@@ -380,20 +348,25 @@
             imagePreviewContainer.classList.add('hidden');
         }
 
-        // --- 计时器逻辑 (云端同步) ---
+        // --- 计时器逻辑 (TCB 同步) ---
         let loveStartDate;
         let timerInterval;
-        const settingsDocRef = doc(db, "settings", "loveInfo");
 
         function listenForDateUpdates() {
-            onSnapshot(settingsDocRef, (docSnap) => {
-                let startDateISO;
-                if (docSnap.exists()) {
-                    startDateISO = docSnap.data().startDate;
+            if(dateListener) dateListener.close();
+            dateListener = db.collection('settings').doc('loveInfo').watch({
+                onChange: (snapshot) => {
+                    const doc = snapshot.docs[0];
+                    const startDateISO = doc ? doc.startDate : null;
+                    loveStartDate = startDateISO ? new Date(startDateISO) : new Date('2023-01-01T00:00:00');
+                    startLoveTimer();
+                },
+                onError: (error) => {
+                    console.error('Date listener error:', error);
+                    // 如果没有文档，手动设置默认值
+                    loveStartDate = new Date('2023-01-01T00:00:00');
+                    startLoveTimer();
                 }
-                // 如果云端没有设置，或设置无效，使用默认日期
-                loveStartDate = startDateISO ? new Date(startDateISO) : new Date('2023-01-01T00:00:00');
-                startLoveTimer();
             });
         }
 
@@ -402,8 +375,12 @@
             if (dateValue) {
                 const newStartDate = new Date(dateValue);
                 try {
-                    await setDoc(settingsDocRef, { startDate: newStartDate.toISOString() });
-                    // onSnapshot会自动更新UI，所以这里只需要关闭输入框
+                    // 使用 set 方法，如果文档不存在则会创建
+                    await db.collection('settings').doc('loveInfo').set({
+                        data:{
+                             startDate: newStartDate.toISOString()
+                        }
+                    });
                     toggleSetDate();
                 } catch (error) {
                     console.error("Error saving start date: ", error);
@@ -432,6 +409,18 @@
         function toggleSetDate() { 
             document.getElementById('date-setter').classList.toggle('hidden'); 
         }
+
+        // 将需要从 HTML 调用的函数暴露到全局
+        window.showPasswordPrompt = showPasswordPrompt;
+        window.hidePasswordPrompt = hidePasswordPrompt;
+        window.checkPassword = checkPassword;
+        window.toggleSetDate = toggleSetDate;
+        window.setLoveStartDate = setLoveStartDate;
+        window.triggerFileUpload = triggerFileUpload;
+        window.previewImage = previewImage;
+        window.removeImage = removeImage;
+        window.addDiaryEntry = addDiaryEntry;
+        window.deleteDiaryEntry = deleteDiaryEntry;
 
     </script>
 </body>
