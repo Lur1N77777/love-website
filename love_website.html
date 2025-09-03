@@ -1,0 +1,411 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>我们的恋爱小屋</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700&family=Lxgw+WenKai+Lite:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Nunito', sans-serif;
+            background-color: #FFF0F5; 
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='40' height='40' viewBox='0 0 40 40'%3E%3Cg fill-rule='evenodd'%3E%3Cg fill='%23FBCFE8' fill-opacity='0.4'%3E%3Cpath d='M0 38.59l2.83-2.83 1.41 1.41L1.41 40H0v-1.41zM0 1.4l2.83 2.83 1.41-1.41L1.41 0H0v1.41zM38.59 40l-2.83-2.83 1.41-1.41L40 38.59V40h-1.41zM40 1.41l-2.83 2.83-1.41-1.41L38.59 0H40v1.41zM20 18.6l2.83-2.83 1.41 1.41L21.41 20l2.83 2.83-1.41 1.41L20 21.41l-2.83 2.83-1.41-1.41L18.59 20l-2.83-2.83 1.41-1.41L20 18.59z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+            -webkit-tap-highlight-color: transparent;
+        }
+        .font-chinese {
+            font-family: 'LXGW WenKai Lite', cursive;
+        }
+        /* 自定义马卡龙色和背景色 */
+        .bg-macaron-pink { background-color: #F8C8DC; }
+        .bg-macaron-blue { background-color: #A2D2FF; }
+        .bg-macaron-yellow { background-color: #FCF3CF; }
+        .bg-macaron-green { background-color: #BDE0FE; }
+        .text-macaron-brown { color: #8d6e63; }
+        .border-macaron-pink { border-color: #F8C8DC; }
+        .border-macaron-blue { border-color: #A2D2FF; }
+        .border-macaron-green { border-color: #BDE0FE; }
+        .bg-warm-white { background-color: #FFFCF9; } /* 温馨的米白色 */
+        .bg-soft-pink-glass { background-color: rgba(255, 240, 245, 0.8); } /* 柔和粉色玻璃效果 */
+
+
+        .fade-in {
+            animation: fadeIn 1s ease-in-out;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .modal-bg {
+            background-color: rgba(0, 0, 0, 0.5);
+        }
+        
+        .diary-image {
+            max-height: 300px;
+            object-fit: cover;
+        }
+    </style>
+</head>
+<body class="flex items-center justify-center min-h-screen">
+
+    <!-- 登录遮罩层 -->
+    <div id="login-modal" class="fixed inset-0 z-50 flex items-center justify-center modal-bg transition-opacity duration-300">
+        <div class="bg-white p-8 rounded-2xl shadow-2xl text-center w-11/12 max-w-sm">
+            <h2 class="text-3xl font-bold text-macaron-brown font-chinese mb-4">进入我们的爱巢</h2>
+            <p class="text-gray-500 mb-6">请选择你的身份~</p>
+            <div class="space-y-4">
+                <button onclick="showPasswordPrompt('her')" class="w-full bg-macaron-pink text-white py-3 rounded-xl font-bold text-lg hover:bg-opacity-80 transition-all duration-300 transform hover:scale-105">我是女生</button>
+                <button onclick="showPasswordPrompt('him')" class="w-full bg-macaron-blue text-white py-3 rounded-xl font-bold text-lg hover:bg-opacity-80 transition-all duration-300 transform hover:scale-105">我是男生</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 密码输入弹窗 (默认隐藏) -->
+    <div id="password-prompt" class="fixed inset-0 z-50 hidden items-center justify-center modal-bg transition-opacity duration-300">
+        <div class="bg-white p-8 rounded-2xl shadow-2xl text-center w-11/11 max-w-sm">
+            <h2 id="password-title" class="text-2xl font-bold text-macaron-brown font-chinese mb-4"></h2>
+            <p class="text-gray-500 mb-6">请输入你的生日作为密码 (格式: MMDD, 如0101)</p>
+            <input type="password" id="password-input" class="w-full border-2 border-gray-200 p-3 rounded-lg text-center text-lg focus:outline-none focus:border-macaron-pink" placeholder="MMDD">
+            <p id="error-message" class="text-red-500 mt-2 h-4"></p>
+            <div class="flex gap-4 mt-4">
+                <button onclick="hidePasswordPrompt()" class="w-full bg-gray-300 text-gray-700 py-2 rounded-xl hover:bg-gray-400 transition-colors">返回</button>
+                <button onclick="checkPassword()" class="w-full bg-macaron-pink text-white py-2 rounded-xl hover:bg-opacity-80 transition-colors">确认</button>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- 主内容区 (默认隐藏) -->
+    <main id="main-content" class="hidden w-full max-w-4xl mx-auto p-4 md:p-8">
+        <div class="bg-soft-pink-glass backdrop-blur-sm rounded-3xl shadow-lg p-6 md:p-10 space-y-8 fade-in">
+            <!-- 头部 -->
+            <header class="text-center">
+                <h1 class="text-4xl md:text-5xl font-bold text-macaron-brown font-chinese">💖 我们的恋爱小屋 💖</h1>
+                <p class="text-gray-500 mt-2">记录我们在一起的每分每秒</p>
+            </header>
+
+            <!-- 恋爱计时器 -->
+            <section id="love-timer" class="bg-macaron-yellow p-6 rounded-2xl shadow-md text-center">
+                 <h2 class="text-xl font-bold text-macaron-brown mb-4 font-chinese flex items-center justify-center gap-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-macaron-brown"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+                    我们已经相爱了
+                </h2>
+                <div id="timer-display" class="flex justify-center items-center space-x-2 md:space-x-4 text-macaron-brown">
+                    <div class="text-center"><span id="days" class="text-4xl md:text-6xl font-bold">0</span><p class="text-sm">天</p></div>
+                    <div class="text-4xl md:text-6xl font-bold">:</div>
+                    <div class="text-center"><span id="hours" class="text-4xl md:text-6xl font-bold">0</span><p class="text-sm">时</p></div>
+                    <div class="text-4xl md:text-6xl font-bold">:</div>
+                    <div class="text-center"><span id="minutes" class="text-4xl md:text-6xl font-bold">0</span><p class="text-sm">分</p></div>
+                    <div class="text-4xl md:text-6xl font-bold">:</div>
+                    <div class="text-center"><span id="seconds" class="text-4xl md:text-6xl font-bold">0</span><p class="text-sm">秒</p></div>
+                </div>
+                <div class="mt-4 text-gray-500 text-sm">
+                    始于: <span id="start-date-display"></span>
+                </div>
+                <button onclick="toggleSetDate()" class="mt-4 bg-white text-macaron-brown px-4 py-2 rounded-lg shadow-sm hover:bg-gray-50 transition">设置/修改纪念日</button>
+                <div id="date-setter" class="hidden mt-4 space-y-2 max-w-sm mx-auto">
+                    <input type="datetime-local" id="love-start-date" class="w-full border-2 border-gray-200 p-2 rounded-lg focus:outline-none focus:border-macaron-blue">
+                    <button onclick="setLoveStartDate()" class="w-full bg-macaron-blue text-white py-2 rounded-lg hover:bg-opacity-80 transition">保存</button>
+                </div>
+            </section>
+
+            <!-- 恋爱日记 -->
+            <section id="love-diary">
+                <h2 class="text-2xl font-bold text-macaron-brown text-center mb-6 font-chinese flex items-center justify-center gap-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-macaron-brown"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"></path><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"></path></svg>
+                    我们的甜蜜日记
+                </h2>
+                
+                <!-- 日记发布 -->
+                <div class="bg-warm-white p-6 rounded-2xl shadow-md mb-8">
+                    <h3 class="font-bold text-lg mb-4 text-macaron-brown font-chinese">写下今天的故事...</h3>
+                    <textarea id="diary-text" rows="4" class="w-full border-2 border-gray-200 p-3 rounded-lg focus:outline-none focus:border-macaron-green" placeholder="今天发生了什么有趣的事呢？"></textarea>
+                    
+                    <!-- 真正的文件上传 -->
+                    <input type="file" id="diary-image-upload" class="hidden" accept="image/*" onchange="previewImage(event)">
+                    
+                    <!-- 图片预览区 -->
+                    <div id="image-preview-container" class="hidden mt-4 text-center">
+                        <img id="image-preview" src="" alt="图片预览" class="max-h-40 mx-auto rounded-lg">
+                        <button onclick="removeImage()" class="mt-2 text-red-500 text-sm">删除图片</button>
+                    </div>
+
+                    <div class="flex justify-between items-center mt-4">
+                        <button onclick="triggerFileUpload()" title="添加图片" class="bg-macaron-pink text-white w-12 h-12 flex items-center justify-center rounded-full hover:bg-opacity-80 transition transform hover:scale-110">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z"></path><circle cx="12" cy="13" r="3"></circle></svg>
+                        </button>
+                        <button onclick="addDiaryEntry()" class="bg-macaron-green text-white py-3 px-8 rounded-xl font-bold hover:bg-opacity-80 transition-all duration-300 transform hover:scale-105">发布日记</button>
+                    </div>
+                </div>
+
+                <!-- 日记列表 -->
+                <div id="diary-entries" class="space-y-6">
+                    <!-- 日记条目会动态添加到这里 -->
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <script>
+        // --- 模拟密码 ---
+        const passwords = {
+            her: '0308', 
+            him: '0705'  
+        };
+        let currentUser = null;
+
+        // --- DOM 元素 ---
+        const loginModal = document.getElementById('login-modal');
+        const passwordPrompt = document.getElementById('password-prompt');
+        const passwordTitle = document.getElementById('password-title');
+        const passwordInput = document.getElementById('password-input');
+        const errorMessage = document.getElementById('error-message');
+        const mainContent = document.getElementById('main-content');
+        
+        const timerDisplay = {
+            days: document.getElementById('days'),
+            hours: document.getElementById('hours'),
+            minutes: document.getElementById('minutes'),
+            seconds: document.getElementById('seconds'),
+        };
+        const startDateDisplay = document.getElementById('start-date-display');
+        const dateSetter = document.getElementById('date-setter');
+        const loveStartDateInput = document.getElementById('love-start-date');
+
+        const diaryText = document.getElementById('diary-text');
+        const diaryImageUpload = document.getElementById('diary-image-upload');
+        const diaryEntriesContainer = document.getElementById('diary-entries');
+        const imagePreviewContainer = document.getElementById('image-preview-container');
+        const imagePreview = document.getElementById('image-preview');
+
+        // --- 核心变量 ---
+        let loveStartDate;
+        let timerInterval;
+        let diaryEntries = [];
+        let uploadedImageDataUrl = null; // 用于存储待上传图片的Base64数据
+
+        // --- 功能函数 ---
+
+        // 登录逻辑
+        function showPasswordPrompt(user) {
+            currentUser = user;
+            passwordTitle.textContent = user === 'her' ? '欢迎小公主回家' : '欢迎我的骑士';
+            passwordPrompt.style.display = 'flex';
+        }
+
+        function hidePasswordPrompt() {
+            passwordPrompt.style.display = 'none';
+            passwordInput.value = '';
+            errorMessage.textContent = '';
+            currentUser = null;
+        }
+
+        function checkPassword() {
+            const inputPassword = passwordInput.value;
+            if (inputPassword === passwords[currentUser]) {
+                loginModal.style.display = 'none';
+                passwordPrompt.style.display = 'none';
+                mainContent.style.display = 'block';
+                initApp();
+            } else {
+                errorMessage.textContent = '密码不对哦，再想想~';
+                passwordInput.classList.add('border-red-500');
+                setTimeout(() => {
+                    errorMessage.textContent = '';
+                    passwordInput.classList.remove('border-red-500');
+                }, 2000);
+            }
+        }
+
+        // 初始化应用
+        function initApp() {
+            loadFromLocalStorage();
+            startLoveTimer();
+            renderDiary();
+        }
+
+        // 计时器逻辑
+        function toggleSetDate() {
+            dateSetter.classList.toggle('hidden');
+        }
+
+        function setLoveStartDate() {
+            const dateValue = loveStartDateInput.value;
+            if (dateValue) {
+                loveStartDate = new Date(dateValue);
+                saveToLocalStorage();
+                startLoveTimer();
+                toggleSetDate();
+            }
+        }
+
+        function startLoveTimer() {
+            if (timerInterval) clearInterval(timerInterval);
+            if (!loveStartDate) return;
+
+            updateTimerDisplay();
+            timerInterval = setInterval(updateTimerDisplay, 1000);
+            
+            const options = { year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' };
+            startDateDisplay.textContent = loveStartDate.toLocaleString('zh-CN', options);
+        }
+
+        function updateTimerDisplay() {
+            const now = new Date();
+            const diff = now - loveStartDate;
+            if (diff < 0) return;
+            const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+            const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+            const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+            const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+            timerDisplay.days.textContent = days;
+            timerDisplay.hours.textContent = String(hours).padStart(2, '0');
+            timerDisplay.minutes.textContent = String(minutes).padStart(2, '0');
+            timerDisplay.seconds.textContent = String(seconds).padStart(2, '0');
+        }
+
+        // 日记与图片上传逻辑
+        function triggerFileUpload() {
+            diaryImageUpload.click();
+        }
+
+        function previewImage(event) {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    uploadedImageDataUrl = e.target.result;
+                    imagePreview.src = uploadedImageDataUrl;
+                    imagePreviewContainer.classList.remove('hidden');
+                }
+                reader.readAsDataURL(file);
+            }
+        }
+
+        function removeImage() {
+            uploadedImageDataUrl = null;
+            diaryImageUpload.value = ''; // 重置文件输入
+            imagePreview.src = '';
+            imagePreviewContainer.classList.add('hidden');
+        }
+
+        function addDiaryEntry() {
+            const text = diaryText.value.trim();
+            if (!text && !uploadedImageDataUrl) {
+                alert('日记内容和图片至少要有一个哦！');
+                return;
+            }
+
+            const newEntry = {
+                id: Date.now(),
+                text: text,
+                imageUrl: uploadedImageDataUrl,
+                timestamp: new Date().toISOString(),
+                author: currentUser
+            };
+
+            diaryEntries.unshift(newEntry);
+            saveToLocalStorage();
+            renderDiary();
+
+            // 清空输入
+            diaryText.value = '';
+            removeImage();
+        }
+
+        function deleteDiaryEntry(id) {
+            if(confirm('真的要删除这篇日记吗？')) {
+                diaryEntries = diaryEntries.filter(entry => entry.id !== id);
+                saveToLocalStorage();
+                renderDiary();
+            }
+        }
+
+        function renderDiary() {
+            diaryEntriesContainer.innerHTML = '';
+            if (diaryEntries.length === 0) {
+                diaryEntriesContainer.innerHTML = `<div class="text-center text-gray-400 py-8 font-chinese">还没有日记呢，快来写下第一篇吧！</div>`;
+                return;
+            }
+
+            diaryEntries.forEach(entry => {
+                const entryEl = document.createElement('div');
+                const isHer = entry.author === 'her';
+                const authorInfo = isHer
+                    ? { name: '小公主', icon: '👑', borderColor: 'border-macaron-pink' }
+                    : { name: '大骑士', icon: '🛡️', borderColor: 'border-macaron-blue' };
+
+                entryEl.className = `bg-warm-white p-5 rounded-2xl shadow-md fade-in border-l-4 ${authorInfo.borderColor}`;
+                
+                const date = new Date(entry.timestamp);
+                const timeString = date.toLocaleString('zh-CN', { year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+
+                let imageHtml = '';
+                if (entry.imageUrl) {
+                    // 图片数据现在是Base64
+                    imageHtml = `<img src="${entry.imageUrl}" alt="日记图片" class="mt-4 rounded-lg w-full diary-image">`;
+                }
+
+                entryEl.innerHTML = `
+                    <div class="flex justify-between items-start">
+                        <div>
+                             <div class="flex items-center gap-2">
+                                <span class="text-xl">${authorInfo.icon}</span>
+                                <span class="font-bold text-macaron-brown font-chinese text-lg">${authorInfo.name}的日记</span>
+                            </div>
+                            <p class="text-xs text-gray-400 mt-1 ml-2">${timeString}</p>
+                        </div>
+                        <button onclick="deleteDiaryEntry(${entry.id})" class="text-gray-400 hover:text-red-500 text-2xl font-bold">&times;</button>
+                    </div>
+                    <p class="text-gray-800 mt-4 whitespace-pre-wrap pl-2">${entry.text}</p>
+                    ${imageHtml}
+                `;
+                diaryEntriesContainer.appendChild(entryEl);
+});
+        }
+
+        // 本地存储
+        function saveToLocalStorage() {
+            try {
+                localStorage.setItem('loveApp_startDate', loveStartDate ? loveStartDate.toISOString() : '');
+                localStorage.setItem('loveApp_diary', JSON.stringify(diaryEntries));
+            } catch (e) {
+                console.error("保存失败，可能是本地存储已满:", e);
+                alert("糟糕，存储空间好像满了！可能需要清理一些旧的日记才能保存新的哦。");
+            }
+        }
+
+        function loadFromLocalStorage() {
+            const savedDate = localStorage.getItem('loveApp_startDate');
+            if (savedDate) {
+                loveStartDate = new Date(savedDate);
+                const yyyy = loveStartDate.getFullYear();
+                const MM = String(loveStartDate.getMonth() + 1).padStart(2, '0');
+                const dd = String(loveStartDate.getDate()).padStart(2, '0');
+                const hh = String(loveStartDate.getHours()).padStart(2, '0');
+                const mm = String(loveStartDate.getMinutes()).padStart(2, '0');
+                loveStartDateInput.value = `${yyyy}-${MM}-${dd}T${hh}:${mm}`;
+            } else {
+                loveStartDate = new Date('2023-01-01T00:00:00');
+                loveStartDateInput.value = '2023-01-01T00:00:00';
+            }
+
+            const savedDiary = localStorage.getItem('loveApp_diary');
+            if (savedDiary) {
+                diaryEntries = JSON.parse(savedDiary);
+            }
+        }
+        
+        passwordInput.addEventListener('keyup', function(event) {
+            if (event.key === "Enter") {
+                checkPassword();
+            }
+        });
+        
+    </script>
+</body>
+</html>
+
