@@ -9,420 +9,231 @@
     <script src="https://cdn.jsdelivr.net/npm/leancloud-storage@4.13/dist/av-live-query-min.js"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <!-- 可爱字体 ZCOOL KuaiLe -->
-    <link href="https://fonts.googleapis.com/css2?family=Gaegu:wght@400;700&family=ZCOOL+KuaiLe&display=swap" rel="stylesheet">
+    <!-- 引入新字体 Inter 和保留的艺术字体 ZCOOL KuaiLe -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&family=ZCOOL+KuaiLe&display=swap" rel="stylesheet">
     <style>
         html { scroll-behavior: smooth; }
-        body { font-family: 'Gaegu', cursive; background-color: #faeee7; -webkit-tap-highlight-color: transparent; }
-        .font-artistic { font-family: 'ZCOOL KuaiLe', cursive; }
-        .text-headline { color: #33272a; }
-        .text-paragraph { color: #594a4e; }
-        .bg-button { background-color: #ff8ba7; }
-        .text-button { color: #33272a; }
-        .bg-card { background-color: #fffffe; }
-        .border-highlight { border-color: #ff8ba7; }
-        .bg-secondary { background-color: #ffc6c7; }
-        .bg-glass-effect {
-            background-color: rgba(255, 255, 254, 0.85);
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            box-shadow: 0 8px 32px 0 rgba(236, 72, 153, 0.15);
+        body { 
+            font-family: 'Inter', sans-serif;
+            background-color: #020617; /* a very dark blue */
+            -webkit-tap-highlight-color: transparent;
         }
-        .fade-in { animation: fadeIn 1s ease-in-out; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(-20px); } to { opacity: 1; transform: translateY(0); } }
-        .modal-bg { background-color: rgba(0, 0, 0, 0.5); }
-        .diary-image { max-height: 300px; object-fit: cover; }
-        .btn-disabled { cursor: not-allowed; background-color: #d1d5db; }
+        .font-artistic { font-family: 'ZCOOL+KuaiLe', cursive; }
+        
+        .custom-scrollbar::-webkit-scrollbar { width: 6px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background-color: rgba(124, 58, 237, 0.5); border-radius: 3px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover { background-color: rgba(124, 58, 237, 0.8); }
+
+        .fade-in { animation: fadeIn 0.8s ease-in-out forwards; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        
+        .card-glow {
+            background-color: rgba(15, 23, 42, 0.7);
+            border: 1px solid rgba(51, 65, 85, 0.5);
+            backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+        }
+
+        .btn-disabled { cursor: not-allowed; background-color: #334155; }
+
         .user-select-btn {
-            background-color: #fffffe;
-            color: #594a4e;
-            font-size: 1.1rem;
-            font-weight: bold;
-            border: 2px solid transparent;
+            background-color: transparent;
+            color: #94a3b8; /* slate-400 */
+            border: 2px solid #334155; /* slate-700 */
         }
         .user-select-btn.selected {
-            border-color: #ff8ba7;
-            color: #33272a;
-            transform: scale(1.05);
-            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+            color: #ffffff;
+            border-color: #8b5cf6; /* violet-500 */
+            background-color: rgba(139, 92, 246, 0.1);
         }
-        .comment-input {
-            border: 2px solid #ffc6c7;
-            font-family: 'Gaegu', cursive;
-            transition: all 0.3s;
+        
+        /* Aurora background animation */
+        #aurora-background {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            overflow: hidden; z-index: -1; background-color: #020617;
         }
-        .comment-input:focus {
-            border-color: #ff8ba7;
-            box-shadow: 0 0 0 3px rgba(255, 139, 167, 0.4);
+        .aurora-shape {
+            position: absolute; border-radius: 50%; filter: blur(100px); opacity: 0.2;
         }
-        .comment-input::placeholder { color: #b2a19b; }
-        #month-nav button {
-            background-color: rgba(255, 255, 254, 0.8);
-            backdrop-filter: blur(5px);
+        .shape1 { width: 500px; height: 500px; background-color: #4f46e5; top: -150px; left: -150px; animation: move-aurora 25s infinite alternate ease-in-out; }
+        .shape2 { width: 600px; height: 600px; background-color: #a855f7; bottom: -200px; right: -200px; animation: move-aurora 35s infinite alternate-reverse ease-in-out; }
+        .shape3 { width: 400px; height: 400px; background-color: #2563eb; bottom: 50%; right: 40%; animation: move-aurora 30s infinite alternate ease-in-out; }
+        @keyframes move-aurora { from { transform: translate(0, 0) rotate(0deg); } to { transform: translate(200px, 100px) rotate(70deg); } }
+        
+        /* Comment drawer animation */
+        .comments-wrapper {
+            display: grid;
+            grid-template-rows: 0fr;
+            transition: grid-template-rows 0.4s ease-in-out;
         }
-        .text-shadow-custom { text-shadow: 1px 1px 4px rgba(0, 0, 0, 0.1); }
+        .comments-wrapper.open {
+            grid-template-rows: 1fr;
+        }
+        .comments-content {
+            overflow: hidden;
+        }
     </style>
 </head>
-<body class="flex items-center justify-center min-h-screen p-4">
-
-    <!-- 主内容区 -->
-    <main id="main-content" class="w-full max-w-4xl mx-auto">
-        <div class="bg-glass-effect rounded-3xl p-6 md:p-10 space-y-8 fade-in">
-            <!-- 头部 -->
-            <header class="text-center">
-                <h1 class="text-5xl md:text-6xl font-artistic text-headline">我们的恋爱小屋</h1>
-                <p class="text-paragraph mt-2 text-lg">记录我们在一起的每分每秒</p>
-            </header>
+<body class="text-slate-300 custom-scrollbar">
+    
+    <div id="aurora-background">
+        <div class="aurora-shape shape1"></div>
+        <div class="aurora-shape shape2"></div>
+        <div class="aurora-shape shape3"></div>
+    </div>
+    
+    <div class="relative min-h-screen w-full px-4 sm:px-6 py-12 sm:py-20">
+        <div class="w-full max-w-3xl mx-auto space-y-12">
             
-            <!-- 用户选择器 -->
-            <section id="user-selector" class="text-center">
-                <h3 class="font-bold text-lg mb-4 text-headline font-artistic text-3xl">今天是谁在记录呀？</h3>
-                <div class="inline-flex rounded-xl shadow-sm">
-                    <button id="select-her" onclick="selectUser('her')" class="user-select-btn px-6 py-3 rounded-l-xl transition-all duration-300">
-                        <span class="text-xl mr-2">👑</span> 小一二
-                    </button>
-                    <button id="select-him" onclick="selectUser('him')" class="user-select-btn px-6 py-3 rounded-r-xl transition-all duration-300">
-                        <span class="text-xl mr-2">🛡️</span> 小布布
-                    </button>
-                </div>
-            </section>
-
-            <!-- 恋爱计时器 -->
-            <section id="love-timer" class="text-center bg-secondary rounded-2xl p-6 shadow-sm">
-                 <h2 class="text-3xl font-artistic text-headline mb-4">我们已经相爱了</h2>
-                <div id="timer-display" class="flex justify-center items-center space-x-2 md:space-x-4 text-headline">
-                    <div class="text-center"><span id="days" class="text-4xl md:text-6xl font-bold text-shadow-custom">0</span><p>天</p></div>
-                    <div class="text-4xl md:text-6xl font-bold text-shadow-custom">:</div>
-                    <div class="text-center"><span id="hours" class="text-4xl md:text-6xl font-bold text-shadow-custom">0</span><p>时</p></div>
-                    <div class="text-4xl md:text-6xl font-bold text-shadow-custom">:</div>
-                    <div class="text-center"><span id="minutes" class="text-4xl md:text-6xl font-bold text-shadow-custom">0</span><p>分</p></div>
-                    <div class="text-4xl md:text-6xl font-bold text-shadow-custom">:</div>
-                    <div class="text-center"><span id="seconds" class="text-4xl md:text-6xl font-bold text-shadow-custom">0</span><p>秒</p></div>
-                </div>
-                <div class="mt-4 text-paragraph font-bold">
-                    始于: <span id="start-date-display">...</span>
-                </div>
-                <button onclick="toggleSetDate()" class="mt-4 bg-card text-paragraph px-4 py-2 rounded-lg shadow-sm hover:bg-gray-50 transition">设置/修改纪念日</button>
-                <div id="date-setter" class="hidden mt-4 space-y-2 max-w-sm mx-auto">
-                    <input type="datetime-local" id="love-start-date" class="w-full border-2 border-gray-200 p-2 rounded-lg focus:outline-none focus:border-highlight">
-                    <button onclick="setLoveStartDate()" class="w-full bg-button text-button rounded-lg py-2 hover:bg-opacity-90 transition">保存</button>
-                </div>
-            </section>
-
-            <!-- 恋爱日记 -->
-            <section id="love-diary">
-                <h2 class="text-4xl font-artistic text-headline text-center mb-6">我们的甜蜜日记</h2>
-                <div class="bg-card p-6 rounded-2xl shadow-md mb-8">
-                    <h3 class="font-bold text-lg mb-4 text-headline font-artistic text-3xl">写下今天的故事...</h3>
-                    <textarea id="diary-text" rows="4" class="w-full border-2 border-gray-200 p-3 rounded-lg focus:outline-none focus:border-highlight" placeholder="今天发生了什么有趣的事呢？"></textarea>
-                    <input type="file" id="diary-image-upload" class="hidden" accept="image/*" onchange="previewImage(event)">
-                    <div id="image-preview-container" class="hidden mt-4 text-center">
-                        <img id="image-preview" src="" alt="图片预览" class="max-h-40 mx-auto rounded-lg">
-                        <button onclick="removeImage()" class="mt-2 text-red-500 text-sm">删除图片</button>
+            <!-- 头部区域 -->
+            <header class="text-center space-y-4 fade-in">
+                <h1 class="text-6xl sm:text-7xl font-artistic text-white">一二布布的悄悄话</h1>
+                <!-- 恋爱计时器 -->
+                <section id="love-timer" class="text-center p-4 rounded-2xl">
+                    <p class="text-sm text-slate-400 mb-2">我们已经相爱了</p>
+                    <div id="timer-display" class="flex justify-center items-end space-x-2 md:space-x-3 text-white">
+                        <div><span id="days" class="text-3xl md:text-4xl font-bold tracking-tight">0</span><span class="text-xs ml-1 text-slate-400">天</span></div>
+                        <div><span id="hours" class="text-3xl md:text-4xl font-bold tracking-tight">00</span><span class="text-xs ml-1 text-slate-400">时</span></div>
+                        <div><span id="minutes" class="text-3xl md:text-4xl font-bold tracking-tight">00</span><span class="text-xs ml-1 text-slate-400">分</span></div>
+                        <div><span id="seconds" class="text-3xl md:text-4xl font-bold tracking-tight">00</span><span class="text-xs ml-1 text-slate-400">秒</span></div>
                     </div>
-                    <div class="flex justify-between items-center mt-4">
-                        <button onclick="triggerFileUpload()" title="添加图片" class="bg-button text-white w-12 h-12 flex items-center justify-center rounded-full hover:bg-opacity-90 transition transform hover:scale-110">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z"></path><circle cx="12" cy="13" r="3"></circle></svg>
+                    <div class="mt-3 text-slate-500 text-xs">
+                        始于: <span id="start-date-display">...</span>
+                        <button onclick="toggleSetDate()" class="ml-2 bg-slate-700/50 text-slate-300 px-2 py-0.5 rounded-md hover:bg-slate-700 transition text-xs">设置</button>
+                    </div>
+                    <div id="date-setter" class="hidden mt-3 space-y-2 max-w-xs mx-auto">
+                        <input type="datetime-local" id="love-start-date" class="w-full bg-slate-800 border-slate-600 text-white p-2 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-violet-500">
+                        <button onclick="setLoveStartDate()" class="w-full bg-violet-600 text-white rounded-lg py-1.5 hover:bg-violet-700 transition text-sm">保存</button>
+                    </div>
+                </section>
+            </header>
+
+            <!-- 日记发布区 -->
+            <section id="publisher-section" class="flex flex-col rounded-[28px] p-2 shadow-sm transition-colors bg-slate-900/70 border border-slate-700/80 backdrop-blur-sm fade-in" style="animation-delay: 0.2s;">
+                <div class="text-center py-2">
+                    <div class="inline-flex rounded-xl p-1 bg-slate-800/50">
+                        <button id="select-her" onclick="selectUser('her')" class="px-6 py-2 rounded-lg transition-all duration-300 flex items-center gap-2 text-sm font-semibold user-select-btn">
+                            <span class="text-lg">👑</span> 小一二
                         </button>
-                        <button id="publish-btn" onclick="addDiaryEntry()" class="bg-button text-button py-3 px-8 rounded-xl font-bold hover:bg-opacity-90 transition-all duration-300 transform hover:scale-105">发布日记</button>
+                        <button id="select-him" onclick="selectUser('him')" class="px-6 py-2 rounded-lg transition-all duration-300 flex items-center gap-2 text-sm font-semibold user-select-btn">
+                            <span class="text-lg">🛡️</span> 小布布
+                        </button>
                     </div>
                 </div>
-                <div id="month-nav" class="sticky top-4 z-10 text-center mb-6 transition-opacity duration-300 opacity-0"></div>
-                <div id="diary-entries" class="space-y-6"></div>
+                <div id="image-preview-container" class="hidden relative mt-1 w-fit rounded-xl px-1 pt-1 ml-2">
+                    <img id="image-preview" src="" alt="Image preview" class="h-16 w-16 rounded-lg object-cover">
+                    <button onclick="removeImage()" class="absolute right-2 top-2 z-10 flex h-4 w-4 items-center justify-center rounded-full bg-black/50 text-white transition-colors hover:bg-black/80" aria-label="Remove image">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" class="h-3 w-3"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                    </button>
+                </div>
+                <textarea id="diary-text" rows="1" placeholder="说点什么吧..." class="custom-scrollbar w-full resize-none border-0 bg-transparent p-3 text-slate-200 placeholder:text-slate-500 focus:ring-0 focus-visible:outline-none min-h-12"></textarea>
+                <div class="mt-0.5 p-1 pt-0">
+                    <div class="flex items-center gap-2">
+                        <input type="file" id="diary-image-upload" class="hidden" accept="image/*" onchange="previewImage(event)">
+                        <button type="button" onclick="triggerFileUpload()" class="flex h-8 w-8 items-center justify-center rounded-full text-slate-300 transition-colors hover:bg-slate-700/50 focus-visible:outline-none">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M12 5V19" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path><path d="M5 12H19" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+                            <span class="sr-only">Attach image</span>
+                        </button>
+                        <div class="ml-auto flex items-center gap-2">
+                            <button id="publish-btn" type="submit" disabled class="flex h-8 w-8 items-center justify-center rounded-full text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:pointer-events-none bg-white text-black hover:bg-white/80 disabled:bg-slate-600">
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M12 5.25L12 18.75" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"></path><path d="M18.75 12L12 5.25L5.25 12" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+                                <span class="sr-only">Send message</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
             </section>
+            
+            <!-- 日记展示区 -->
+            <main id="diary-entries" class="space-y-8"></main>
         </div>
-    </main>
+    </div>
     
     <!-- 通用消息弹窗 -->
-    <div id="message-modal" class="fixed inset-0 z-50 hidden items-center justify-center modal-bg">
-        <div class="bg-card p-6 rounded-2xl shadow-2xl text-center w-11/12 max-w-sm">
-            <p id="message-modal-text" class="text-paragraph mb-6 text-lg"></p>
+    <div id="message-modal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/70 backdrop-blur-sm">
+        <div class="card-glow p-6 rounded-2xl shadow-2xl text-center w-11/12 max-w-sm">
+            <p id="message-modal-text" class="text-slate-200 mb-6 text-base"></p>
             <div id="message-modal-buttons" class="flex gap-4 justify-center"></div>
         </div>
     </div>
-
+    
     <script>
     window.addEventListener('DOMContentLoaded', function() {
-        // --- LeanCloud 集成 ---
-        const APP_ID = "yTrfbPzoiL7ULr4D1iAOoDFn-gzGzoHsz";
-        const APP_KEY = "XkqnzXsCOCRDoUTyTUNvt9sa";
-        const SERVER_URL = "https://ytrfbpzo.lc-cn-n1-shared.com";
-
+        const APP_ID = "yTrfbPzoiL7ULr4D1iAOoDFn-gzGzoHsz", APP_KEY = "XkqnzXsCOCRDoUTyTUNvt9sa", SERVER_URL = "https://ytrfbpzo.lc-cn-n1-shared.com";
         AV.init({ appId: APP_ID, appKey: APP_KEY, serverURL: SERVER_URL });
 
-        // --- 全局变量 ---
         let currentUser = null, selectedFile = null, confirmCallback = null;
-        let diaryLiveQuery, settingsLiveQuery, commentLiveQuery;
 
-        // --- DOM 元素引用 ---
         const DOMElements = {
-            diaryText: document.getElementById('diary-text'),
-            diaryImageUpload: document.getElementById('diary-image-upload'),
             diaryEntriesContainer: document.getElementById('diary-entries'),
-            imagePreviewContainer: document.getElementById('image-preview-container'),
-            imagePreview: document.getElementById('image-preview'),
-            publishBtn: document.getElementById('publish-btn'),
             messageModal: document.getElementById('message-modal'),
             messageModalText: document.getElementById('message-modal-text'),
             messageModalButtons: document.getElementById('message-modal-buttons'),
-            monthNavContainer: document.getElementById('month-nav'),
+            diaryTextInput: document.getElementById('diary-text'),
+            publishBtn: document.getElementById('publish-btn'),
+            imagePreviewContainer: document.getElementById('image-preview-container'),
+            imagePreview: document.getElementById('image-preview'),
+            diaryImageUpload: document.getElementById('diary-image-upload'),
         };
-        
-        // --- 函数定义区 (提前定义所有函数) ---
-        
-        function showAlert(message) {
-            DOMElements.messageModalText.textContent = message;
-            DOMElements.messageModalButtons.innerHTML = `<button onclick="hideMessageModal()" class="w-full bg-button text-button py-2 px-6 rounded-xl hover:bg-opacity-90 transition-colors">好的</button>`;
-            DOMElements.messageModal.style.display = 'flex';
-        }
-
-        function hideMessageModal() { DOMElements.messageModal.style.display = 'none'; }
-
-        function showConfirm(message, callback) {
-            confirmCallback = callback;
-            DOMElements.messageModalText.textContent = message;
-            DOMElements.messageModalButtons.innerHTML = `
-                <button onclick="hideMessageModal()" class="w-1/2 bg-gray-200 text-gray-700 py-2 rounded-xl hover:bg-gray-300 transition-colors">取消</button>
-                <button onclick="executeConfirm()" class="w-1/2 bg-button text-button py-2 rounded-xl hover:bg-opacity-90 transition-colors">确认</button>
-            `;
-            DOMElements.messageModal.style.display = 'flex';
-        }
-
-        function executeConfirm() {
-            if (confirmCallback) confirmCallback();
-            hideMessageModal();
-            confirmCallback = null;
-        }
         
         function selectUser(user) {
             currentUser = user;
-            document.getElementById('select-her').classList.toggle('selected', user === 'her');
-            document.getElementById('select-him').classList.toggle('selected', user === 'him');
+            document.querySelectorAll('.user-select-btn').forEach(btn => btn.classList.remove('selected'));
+            if (user === 'her') document.getElementById('select-her').classList.add('selected');
+            else document.getElementById('select-him').classList.add('selected');
         }
 
-        function scrollToMonth(month) {
-            const firstEntryOfMonth = document.querySelector(`.diary-entry[data-month="${month}"]`);
-            if (firstEntryOfMonth) {
-                firstEntryOfMonth.scrollIntoView({ behavior: 'smooth', block: 'start' });
-            }
+        function toggleComments(diaryId) {
+            const commentsWrapper = document.getElementById(`comments-section-${diaryId}`);
+            commentsWrapper.classList.toggle('open');
         }
 
-        function renderMonthNav(entries) {
-            if (entries.length < 5) {
-                DOMElements.monthNavContainer.innerHTML = '';
-                DOMElements.monthNavContainer.classList.add('opacity-0');
-                return;
-            }
-            const months = [...new Set(entries.map(entry => {
-                const date = new Date(entry.createdAt);
-                return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
-            }))];
-            DOMElements.monthNavContainer.innerHTML = months.map(month => 
-                `<button onclick="scrollToMonth('${month}')" class="px-3 py-1 text-sm text-paragraph rounded-full shadow-sm hover:bg-secondary hover:text-headline transition-colors mx-1">${month}</button>`
-            ).join('');
-            DOMElements.monthNavContainer.classList.remove('opacity-0');
-        }
-        
-        async function fetchAndRenderDiaries() {
-             const query = new AV.Query('Diary');
-             query.descending('createdAt');
-             query.include('imageUrl');
-             try {
-                const results = await query.find();
-                const entries = results.map(d => ({ id: d.id, ...d.attributes, createdAt: d.createdAt }));
-                renderMonthNav(entries);
-                await renderDiary(entries);
-             } catch(error) {
-                 console.error("Failed to fetch diaries:", error);
-             }
-        }
-        
-        async function fetchAndRenderComments(diaryId) {
-            const container = document.getElementById(`comments-for-${diaryId}`);
-            if (!container) return;
-            const query = new AV.Query('Comment');
-            query.equalTo('diary', AV.Object.createWithoutData('Diary', diaryId));
-            query.ascending('createdAt');
-            try {
-                const comments = await query.find();
-                container.innerHTML = '';
-                comments.forEach(comment => {
-                    const author = comment.get('author');
-                    const text = comment.get('text');
-                    const isHer = author === 'her';
-                    const authorInfo = isHer ? { name: '小一二', icon: '👑'} : { name: '小布布', icon: '🛡️'};
-                    const date = new Date(comment.get('createdAt'));
-                    const timeString = date.toLocaleString('zh-CN', { month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' });
-                    const commentEl = document.createElement('div');
-                    commentEl.className = 'flex items-start gap-2 mt-2 group';
-                    commentEl.innerHTML = `
-                        <span class="text-lg">${authorInfo.icon}</span>
-                        <div class="bg-gray-100 rounded-lg px-3 py-1 text-sm flex-grow">
-                            <div class="flex justify-between items-center">
-                                <div>
-                                    <span class="font-bold text-headline">${authorInfo.name}:</span>
-                                    <span class="text-paragraph">${text}</span>
-                                </div>
-                                <button onclick="deleteComment('${comment.id}')" class="text-gray-300 hover:text-red-500 text-xl font-bold opacity-0 group-hover:opacity-100 transition-opacity">&times;</button>
-                            </div>
-                            <p class="text-xs text-gray-400 mt-1">${timeString}</p>
-                        </div>
-                    `;
-                    container.appendChild(commentEl);
-                });
-            } catch (error) { console.error(`Failed to fetch comments for ${diaryId}:`, error); }
-        }
-        
-        async function addDiaryEntry() {
-            if (!currentUser) return showAlert('要先选择是谁在写日记哦~');
-            const text = DOMElements.diaryText.value.trim();
-            if (!text && !selectedFile) return showAlert('日记内容和图片至少要有一个哦！');
-            
-            DOMElements.publishBtn.disabled = true;
-            DOMElements.publishBtn.textContent = '发布中...';
-            DOMElements.publishBtn.classList.add('btn-disabled');
-
-            try {
-                const Diary = AV.Object.extend('Diary');
-                const diary = new Diary();
-                
-                let savedImageFile = null;
-                if (selectedFile) {
-                    DOMElements.publishBtn.textContent = '图片上传中...';
-                    // 先创建并保存文件
-                    const imageFile = new AV.File(selectedFile.name, selectedFile);
-                    savedImageFile = await imageFile.save();
-                }
-                
-                DOMElements.publishBtn.textContent = '保存日记中...';
-                diary.set('text', text);
-                diary.set('author', currentUser);
-                if (savedImageFile) {
-                    // 使用已保存的文件对象进行关联
-                    diary.set('imageUrl', savedImageFile);
-                }
-                await diary.save();
-                
-                DOMElements.diaryText.value = '';
-                removeImage();
-            } catch (error) {
-                console.error("Error adding document: ", error);
-                showAlert(`发布日记失败: ${error.message}`);
-            } finally {
-                DOMElements.publishBtn.disabled = false;
-                DOMElements.publishBtn.textContent = '发布日记';
-                DOMElements.publishBtn.classList.remove('btn-disabled');
-            }
-        }
-        
-        async function addComment(diaryId) {
-            if (!currentUser) return showAlert('要先选择是谁在留言哦~');
-            const inputEl = document.getElementById(`comment-input-${diaryId}`);
-            const text = inputEl.value.trim();
-            if (!text) return;
-            try {
-                const Comment = AV.Object.extend('Comment');
-                const comment = new Comment();
-                comment.set('text', text);
-                comment.set('author', currentUser);
-                comment.set('diary', AV.Object.createWithoutData('Diary', diaryId));
-                await comment.save();
-                inputEl.value = '';
-            } catch (error) {
-                console.error('Error adding comment:', error);
-                showAlert('留言失败了，请稍后再试~');
-            }
-        }
-
-        async function listenForUpdates() {
-            const diaryQuery = new AV.Query('Diary');
-            const commentQuery = new AV.Query('Comment');
-            
-            try {
-                diaryLiveQuery = await diaryQuery.subscribe();
-                diaryLiveQuery.on('create', fetchAndRenderDiaries);
-                diaryLiveQuery.on('update', fetchAndRenderDiaries);
-                diaryLiveQuery.on('delete', fetchAndRenderDiaries);
-
-                commentLiveQuery = await commentQuery.subscribe();
-                commentLiveQuery.on('create', (comment) => {
-                    const diaryPointer = comment.get('diary');
-                    if (diaryPointer) fetchAndRenderComments(diaryPointer.id);
-                });
-                commentLiveQuery.on('delete', (comment) => {
-                    const diaryPointer = comment.get('diary');
-                     if (diaryPointer) fetchAndRenderComments(diaryPointer.id);
-                });
-            } catch(e) {
-                console.error("LiveQuery Subscription failed:", e);
-            }
-            
-            fetchAndRenderDiaries();
-            listenForDateUpdates();
-        }
-        
-        async function deleteDiaryEntry(id) {
-            showConfirm('真的要删除这篇日记吗？这会从云端永久删除哦！', async () => {
-                try {
-                    const diary = AV.Object.createWithoutData('Diary', id);
-                    await diary.destroy();
-                } catch(error) { showAlert("删除失败，请稍后再试。"); }
-            });
-        }
-        
-        async function deleteComment(id) {
-            showConfirm('确定要删除这条留言吗？', async () => {
-                 try {
-                    const comment = AV.Object.createWithoutData('Comment', id);
-                    await comment.destroy();
-                } catch(error) { showAlert("删除留言失败，请稍后再试。"); }
-            });
-        }
-
-        async function renderDiary(entries) {
+        async function renderDiaryEntries(entries) {
             DOMElements.diaryEntriesContainer.innerHTML = '';
             if (entries.length === 0) {
-                 DOMElements.diaryEntriesContainer.innerHTML = `<div class="text-center text-paragraph py-8 font-artistic text-xl">还没有日记呢，快来写下第一篇吧！</div>`;
+                DOMElements.diaryEntriesContainer.innerHTML = `<div class="text-center text-slate-500 py-8">还没有日记呢，快来写下第一篇吧！</div>`;
                 return;
             }
+
             for (const entry of entries) {
-                const entryEl = document.createElement('div');
+                const entryEl = document.createElement('article');
+                entryEl.className = 'card-glow rounded-3xl fade-in shadow-lg shadow-violet-900/20';
+                
                 const isHer = entry.author === 'her';
-                const authorInfo = isHer
-                    ? { name: '小一二', icon: '👑', borderColor: 'border-highlight' }
-                    : { name: '小布布', icon: '🛡️', borderColor: 'border-blue-300' };
-                
+                const authorInfo = isHer ? { name: '小一二', icon: '👑' } : { name: '小布布', icon: '🛡️' };
                 const date = new Date(entry.createdAt);
-                const monthString = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
-                
-                entryEl.className = `diary-entry bg-card p-5 rounded-2xl shadow-md fade-in border-l-4 ${authorInfo.borderColor}`;
-                entryEl.setAttribute('data-month', monthString);
-                
                 const timeString = date.toLocaleString('zh-CN', { year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' });
-                
-                const imageObject = entry.imageUrl;
-                const imageUrl = imageObject ? imageObject.get('url') : null;
-                const imageHtml = imageUrl ? `<img src="${imageUrl}" alt="日记图片" class="mt-4 rounded-lg w-full diary-image">` : '';
+                const imageUrl = entry.imageUrl ? entry.imageUrl.get('url') : null;
 
                 entryEl.innerHTML = `
-                    <div class="flex justify-between items-start">
-                        <div>
-                             <div class="flex items-center gap-2">
-                                <span class="text-xl">${authorInfo.icon}</span>
-                                <span class="font-bold text-headline font-artistic text-3xl">${authorInfo.name}的日记</span>
+                    <div class="p-8">
+                        ${imageUrl ? `<img src="${imageUrl}" alt="日记图片" class="w-full rounded-xl mb-6 max-h-[60vh] object-contain">` : ''}
+                        <p class="text-slate-300 whitespace-pre-wrap leading-relaxed mb-8">${entry.text || ''}</p>
+                    
+                        <div class="flex justify-between items-center">
+                            <div class="flex items-center gap-x-3">
+                                <div class="size-10 rounded-full bg-slate-700/50 flex items-center justify-center text-2xl">${authorInfo.icon}</div>
+                                <div>
+                                    <p class="font-semibold text-white">${authorInfo.name}</p>
+                                    <p class="text-xs text-slate-400">${timeString}</p>
+                                </div>
                             </div>
-                            <p class="text-xs text-gray-400 mt-1 ml-2">${timeString}</p>
+                            <div class="flex items-center gap-x-4">
+                                <button onclick="toggleComments('${entry.id}')" class="text-slate-400 hover:text-white transition flex items-center gap-1">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
+                                    <span id="comment-count-${entry.id}" class="text-xs font-mono"></span>
+                                </button>
+                                <button onclick="deleteDiaryEntry('${entry.id}')" class="text-slate-500 hover:text-red-500 text-xl font-bold">&times;</button>
+                            </div>
                         </div>
-                        <button onclick="deleteDiaryEntry('${entry.id}')" class="text-gray-400 hover:text-red-500 text-2xl font-bold">&times;</button>
-                    </div>
-                    <p class="text-paragraph mt-4 whitespace-pre-wrap pl-2 text-lg">${entry.text || ''}</p>
-                    ${imageHtml}
-                    <div class="mt-4 pt-4 border-t border-gray-200">
-                        <div id="comments-for-${entry.id}" class="space-y-2"></div>
-                        <div class="mt-3 flex items-center gap-2">
-                            <input id="comment-input-${entry.id}" type="text" placeholder="说点什么吧..." class="comment-input w-full text-sm rounded-lg px-3 py-1 focus:outline-none">
-                            <button onclick="addComment('${entry.id}')" class="bg-button text-button text-sm rounded-lg px-3 py-1 hover:bg-opacity-90 transition">发送</button>
+                        <div id="comments-section-${entry.id}" class="comments-wrapper">
+                            <div class="comments-content mt-6 pt-6 border-t border-slate-700/50">
+                                <div id="comments-for-${entry.id}" class="space-y-3 mb-4 max-h-48 overflow-y-auto custom-scrollbar pr-2"></div>
+                                <div class="flex items-center gap-2">
+                                    <input id="comment-input-${entry.id}" type="text" placeholder="说点什么吧..." class="bg-slate-800/50 border-slate-700 w-full text-sm rounded-lg px-3 py-1.5 focus:outline-none focus:ring-1 focus:ring-violet-500">
+                                    <button onclick="addComment('${entry.id}')" class="bg-violet-600/80 text-white text-sm rounded-lg px-3 py-1.5 hover:bg-violet-600 transition flex-shrink-0">发送</button>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 `;
@@ -430,104 +241,115 @@
                 await fetchAndRenderComments(entry.id);
             }
         }
-
-        function triggerFileUpload() { DOMElements.diaryImageUpload.click(); }
         
-        function previewImage(event) {
-             const file = event.target.files[0];
-            if (file) {
-                selectedFile = file;
-                const reader = new FileReader();
-                reader.onload = (e) => {
-                    DOMElements.imagePreview.src = e.target.result;
-                    DOMElements.imagePreviewContainer.classList.remove('hidden');
-                };
-                reader.readAsDataURL(file);
-            }
-        }
-
-        function removeImage() {
-            selectedFile = null;
-            DOMElements.diaryImageUpload.value = '';
-            DOMElements.imagePreview.src = '';
-            DOMElements.imagePreviewContainer.classList.add('hidden');
-        }
-        
-        let loveStartDate, timerInterval;
-        
-        function updateTimerUI(dateISO) {
-             loveStartDate = dateISO ? new Date(dateISO) : new Date('2023-01-01T00:00:00');
-             if (timerInterval) clearInterval(timerInterval);
-             const update = () => {
-                const now = new Date();
-                const diff = now - loveStartDate;
-                document.getElementById('days').textContent = Math.floor(diff / 864e5);
-                document.getElementById('hours').textContent = String(Math.floor((diff % 864e5) / 36e5)).padStart(2, '0');
-                document.getElementById('minutes').textContent = String(Math.floor((diff % 36e5) / 6e4)).padStart(2, '0');
-                document.getElementById('seconds').textContent = String(Math.floor((diff % 6e4) / 1e3)).padStart(2, '0');
-             };
-             update();
-             timerInterval = setInterval(update, 1000);
-             document.getElementById('start-date-display').textContent = loveStartDate.toLocaleString('zh-CN', { year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' });
-        }
-        
-        async function listenForDateUpdates() {
-            if (settingsLiveQuery) await settingsLiveQuery.unsubscribe();
-            const query = new AV.Query('Settings');
-            
+        async function fetchAndRenderComments(diaryId) {
+            const container = document.getElementById(`comments-for-${diaryId}`); if (!container) return;
+            const query = new AV.Query('Comment');
+            query.equalTo('diary', AV.Object.createWithoutData('Diary', diaryId));
+            query.ascending('createdAt');
             try {
-                const setting = await query.first();
-                updateTimerUI(setting ? setting.get('startDate') : null);
-                settingsLiveQuery = await query.subscribe();
-                settingsLiveQuery.on('update', (setting) => updateTimerUI(setting.get('startDate')));
-                settingsLiveQuery.on('create', (setting) => updateTimerUI(setting.get('startDate')));
-            } catch(e) { console.error("Failed to subscribe to settings:", e); }
+                const comments = await query.find();
+                const countContainer = document.getElementById(`comment-count-${diaryId}`);
+                if (countContainer) {
+                    if (comments.length > 0) {
+                        countContainer.textContent = comments.length;
+                    } else {
+                        countContainer.textContent = '';
+                    }
+                }
+                container.innerHTML = comments.map(comment => {
+                    const author = comment.get('author'), text = comment.get('text'), isHer = author === 'her';
+                    const authorInfo = isHer ? { name: '小一二', icon: '👑'} : { name: '小布布', icon: '🛡️'};
+                    const date = new Date(comment.get('createdAt'));
+                    const timeString = date.toLocaleString('zh-CN', { month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' });
+                    return `
+                        <div class="flex items-start gap-2 group text-sm">
+                            <span class="text-lg mt-0.5">${authorInfo.icon}</span>
+                            <div class="bg-slate-700/50 rounded-lg px-3 py-1.5 flex-grow">
+                                <div class="flex justify-between items-start">
+                                  <div><span class="font-bold text-white">${authorInfo.name}:</span> <span class="text-slate-300">${text}</span></div>
+                                  <button onclick="deleteComment('${comment.id}', '${diaryId}')" class="text-slate-600 hover:text-red-500 font-bold opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0 ml-2">&times;</button>
+                                </div>
+                                <div class="text-right text-xs text-slate-500 mt-1">${timeString}</div>
+                            </div>
+                        </div>`;
+                }).join('');
+            } catch (error) { console.error(`Failed to fetch comments for ${diaryId}:`, error); }
         }
 
-        async function setLoveStartDate() {
-            const dateValue = document.getElementById('love-start-date').value;
-            if (dateValue) {
-                const newStartDate = new Date(dateValue);
-                const query = new AV.Query('Settings');
-                try {
-                    let setting = await query.first();
-                    if (!setting) {
-                        const Settings = AV.Object.extend('Settings');
-                        setting = new Settings();
-                    }
-                    setting.set('startDate', newStartDate.toISOString());
-                    await setting.save();
-                    toggleSetDate();
-                } catch (error) { showAlert("保存纪念日失败，请稍后再试。"); }
-            }
+        async function listenForUpdates() {
+             try {
+                const diaryQuery = new AV.Query('Diary');
+                const diaryLiveQuery = await diaryQuery.subscribe();
+                const fullRender = async () => { const entries = await new AV.Query('Diary').descending('createdAt').include('imageUrl').find(); renderDiaryEntries(entries.map(d => ({ id: d.id, ...d.attributes, createdAt: d.createdAt }))); };
+                diaryLiveQuery.on('create', fullRender);
+                diaryLiveQuery.on('update', fullRender);
+                diaryLiveQuery.on('delete', fullRender);
+
+                const commentQuery = new AV.Query('Comment');
+                const commentLiveQuery = await commentQuery.subscribe();
+                commentLiveQuery.on('create', (comment) => { const diaryPointer = comment.get('diary'); if (diaryPointer) fetchAndRenderComments(diaryPointer.id); });
+                commentLiveQuery.on('delete', (comment) => { const diaryPointer = comment.get('diary'); if (diaryPointer) fetchAndRenderComments(diaryPointer.id); });
+
+                const settingsQuery = new AV.Query('Settings');
+                const setting = await settingsQuery.first();
+                updateTimerUI(setting ? setting.get('startDate') : null);
+                const settingsLiveQuery = await settingsQuery.subscribe();
+                settingsLiveQuery.on('update', (s) => updateTimerUI(s.get('startDate')));
+                settingsLiveQuery.on('create', (s) => updateTimerUI(s.get('startDate')));
+            } catch(e) { console.error("LiveQuery Subscription failed:", e); }
         }
-        
-        function toggleSetDate() { document.getElementById('date-setter').classList.toggle('hidden'); }
         
         async function initApp() {
-            listenForUpdates();
-        }
-
-        async function connectToCloud() {
-            try {
-                if (!AV.User.current()) await AV.User.loginAnonymously();
-                initApp();
-            } catch (error) {
-                console.error("LeanCloud connection failed:", error);
-                showAlert("无法建立安全的云端连接，请检查网络并刷新页面。");
-            }
+            const query = new AV.Query('Diary');
+            query.descending('createdAt');
+            query.include('imageUrl');
+            const results = await query.find();
+            const entries = results.map(d => ({ id: d.id, ...d.attributes, createdAt: d.createdAt }));
+            await renderDiaryEntries(entries);
+            await listenForUpdates();
         }
         
-        // --- 启动应用 ---
-        connectToCloud();
+        const showAlert = function(message) { DOMElements.messageModalText.textContent = message; DOMElements.messageModalButtons.innerHTML = `<button onclick="this.parentElement.parentElement.parentElement.style.display='none'" class="w-full bg-violet-600 text-white py-2 px-6 rounded-lg hover:bg-violet-700 transition-colors text-sm">好的</button>`; DOMElements.messageModal.style.display = 'flex'; };
+        const showConfirm = function(message, callback) { confirmCallback = callback; DOMElements.messageModalText.textContent = message; DOMElements.messageModalButtons.innerHTML = `<button onclick="this.parentElement.parentElement.parentElement.style.display='none'" class="w-1/2 bg-slate-600 text-slate-200 py-2 rounded-lg hover:bg-slate-500 transition-colors text-sm">取消</button><button id="confirm-execute-btn" class="w-1/2 bg-violet-600 text-white py-2 rounded-lg hover:bg-violet-700 transition-colors text-sm">确认</button>`; DOMElements.messageModal.style.display = 'flex'; document.getElementById('confirm-execute-btn').onclick = () => { if (confirmCallback) { confirmCallback(); DOMElements.messageModal.style.display = 'none'; confirmCallback = null; } };};
+        
+        const updatePublishButtonState = function() {
+            const hasValue = DOMElements.diaryTextInput.value.trim().length > 0 || selectedFile;
+            DOMElements.publishBtn.disabled = !hasValue;
+        };
 
-        // --- 将函数暴露到全局 ---
+        const removeImage = function() { selectedFile = null; DOMElements.diaryImageUpload.value = ''; DOMElements.imagePreview.src = ''; DOMElements.imagePreviewContainer.classList.add('hidden'); updatePublishButtonState();};
+        
+        const addDiaryEntry = async function() { if (!currentUser) return showAlert('要先选择是谁在写日记哦~'); const text = DOMElements.diaryTextInput.value.trim(); if (!text && !selectedFile) return showAlert('日记内容和图片至少要有一个哦！'); DOMElements.publishBtn.disabled = true; try { const Diary = AV.Object.extend('Diary'); const diary = new Diary(); diary.set('text', text); diary.set('author', currentUser); if (selectedFile) { const imageFile = new AV.File(selectedFile.name, selectedFile); diary.set('imageUrl', imageFile); } await diary.save(); DOMElements.diaryTextInput.value = ''; DOMElements.diaryTextInput.style.height = 'auto'; removeImage(); } catch (error) { showAlert(`发布日记失败: ${error.message}`); } finally { DOMElements.publishBtn.disabled = false; updatePublishButtonState(); } };
+        
+        const addComment = async function(diaryId) { if (!currentUser) return showAlert('要先选择是谁在留言哦~'); const inputEl = document.getElementById(`comment-input-${diaryId}`); const text = inputEl.value.trim(); if (!text) return; try { const Comment = AV.Object.extend('Comment'); const comment = new Comment(); comment.set('text', text); comment.set('author', currentUser); comment.set('diary', AV.Object.createWithoutData('Diary', diaryId)); await comment.save(); inputEl.value = ''; } catch (error) { showAlert('留言失败了，请稍后再试~'); } };
+        const deleteDiaryEntry = function(id) { showConfirm('真的要删除这篇日记吗？', async () => { try { await AV.Object.createWithoutData('Diary', id).destroy(); } catch(error) { showAlert("删除失败，请稍后再试。"); } }); };
+        const deleteComment = function(id, diaryId) { showConfirm('确定要删除这条留言吗？', async () => { try { await AV.Object.createWithoutData('Comment', id).destroy(); fetchAndRenderComments(diaryId); } catch(error) { showAlert("删除留言失败，请稍后再试。"); } }); };
+        let loveStartDate, timerInterval; const updateTimerUI = function(dateISO) { loveStartDate = dateISO ? new Date(dateISO) : new Date('2023-01-01T00:00:00'); if (timerInterval) clearInterval(timerInterval); const update = () => { const now = new Date(); const diff = now - loveStartDate; document.getElementById('days').textContent = Math.floor(diff / 864e5); document.getElementById('hours').textContent = String(Math.floor((diff % 864e5) / 36e5)).padStart(2, '0'); document.getElementById('minutes').textContent = String(Math.floor((diff % 36e5) / 6e4)).padStart(2, '0'); document.getElementById('seconds').textContent = String(Math.floor((diff % 6e4) / 1e3)).padStart(2, '0'); }; update(); timerInterval = setInterval(update, 1000); document.getElementById('start-date-display').textContent = loveStartDate.toLocaleString('zh-CN', { year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' }); };
+        const toggleSetDate = function() { document.getElementById('date-setter').classList.toggle('hidden'); };
+        const setLoveStartDate = async function() { const dateValue = document.getElementById('love-start-date').value; if (dateValue) { const newStartDate = new Date(dateValue); const query = new AV.Query('Settings'); try { let setting = await query.first(); if (!setting) { const Settings = AV.Object.extend('Settings'); setting = new Settings(); } setting.set('startDate', newStartDate.toISOString()); await setting.save(); toggleSetDate(); } catch (error) { showAlert("保存纪念日失败，请稍后再试。"); } } };
+        const triggerFileUpload = function() { DOMElements.diaryImageUpload.click(); };
+        const previewImage = function(event) { const file = event.target.files[0]; if (!file) return; selectedFile = file; const reader = new FileReader(); reader.onload = (e) => { DOMElements.imagePreview.src = e.target.result; DOMElements.imagePreviewContainer.classList.remove('hidden'); }; reader.readAsDataURL(file); updatePublishButtonState(); };
+        const connectToCloud = async function() { try { if (!AV.User.current()) await AV.User.loginAnonymously(); initApp(); } catch (error) { showAlert("无法建立安全的云端连接，请检查网络并刷新页面。"); } };
+
         Object.assign(window, {
-            selectUser, toggleSetDate, setLoveStartDate, triggerFileUpload,
-            previewImage, removeImage, addDiaryEntry, deleteDiaryEntry,
-            addComment, deleteComment, hideMessageModal, executeConfirm, scrollToMonth,
-            fetchAndRenderComments
+            selectUser, toggleComments,
+            addDiaryEntry, addComment, deleteDiaryEntry, deleteComment,
+            triggerFileUpload, previewImage, removeImage,
+            toggleSetDate, setLoveStartDate
         });
+        
+        DOMElements.diaryTextInput.addEventListener('input', () => {
+            const textarea = DOMElements.diaryTextInput;
+            textarea.style.height = 'auto';
+            const newHeight = Math.min(textarea.scrollHeight, 200); // Max height 200px
+            textarea.style.height = `${newHeight}px`;
+            updatePublishButtonState();
+        });
+
+        DOMElements.publishBtn.onclick = addDiaryEntry;
+
+        connectToCloud();
     });
     </script>
 </body>
